@@ -25,7 +25,10 @@ export function constraintError(error: unknown): HttpError | null {
     return new HttpError(409, "Já existe um registo com esse valor.");
   }
   if (message.includes("FOREIGN KEY constraint failed")) {
-    return new HttpError(409, "O registo está ligado a outros dados ou referencia dados que não existem.");
+    return new HttpError(
+      409,
+      "O registo está ligado a outros dados ou referencia dados que não existem.",
+    );
   }
   if (message.includes("CHECK constraint failed")) {
     return new HttpError(400, "Os dados não respeitam as regras da base de dados.");

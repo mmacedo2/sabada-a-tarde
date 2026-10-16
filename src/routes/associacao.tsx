@@ -2,9 +2,12 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { DocumentList } from "@/components/site/DocumentList";
 import { PageHeader, SectionTitle } from "@/components/site/PageHeader";
-import { ASSOCIATION, SEASON, clubs, documents } from "@/data/afpg";
+import { ASSOCIATION } from "@/data/afpg";
+import { api, type Doc } from "@/lib/api";
+import { useCatalog } from "@/lib/catalog";
 
 export const Route = createFileRoute("/associacao")({
+  loader: () => api.get<Doc[]>("/api/documents"),
   head: () => ({
     meta: [
       { title: "A Associação — Sábado à Tarde" },
@@ -24,10 +27,17 @@ export const Route = createFileRoute("/associacao")({
 });
 
 function AboutPage() {
+  const documents = Route.useLoaderData();
+  const { season, clubs } = useCatalog();
   const institutional = documents.filter((d) =>
-    ["Regulamentos", "Impressos AFPG", "Impressos FFPN", "Secretaria", "Interconcelhias FFPN", "Conselho de Disciplina"].includes(
-      d.category,
-    ),
+    [
+      "Regulamentos",
+      "Impressos AFPG",
+      "Impressos FFPN",
+      "Secretaria",
+      "Interconcelhias FFPN",
+      "Conselho de Disciplina",
+    ].includes(d.category),
   );
 
   return (
@@ -48,9 +58,10 @@ function AboutPage() {
               Taça Cidade Berço e a Taça de Disciplina.
             </p>
             <p>
-              Na época {SEASON} participam {clubs.length} clubes das freguesias de Guimarães. Toda a
-              atividade competitiva é publicada em documentos oficiais — calendários, classificações,
-              boletins de resultados e comunicados — acessíveis a partir deste site.
+              Na época {season?.name ?? "atual"} participam {clubs.length} clubes das freguesias de
+              Guimarães. Toda a atividade competitiva é publicada em documentos oficiais —
+              calendários, classificações, boletins de resultados e comunicados — acessíveis a
+              partir deste site.
             </p>
             <p>
               A secretaria da Associação assegura o apoio aos clubes, a receção de impressos e a
@@ -78,7 +89,9 @@ function AboutPage() {
           <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
             <li className="font-semibold text-foreground">{ASSOCIATION.name}</li>
             <li>{ASSOCIATION.address}</li>
-            <li>tel. {ASSOCIATION.phone} · fax {ASSOCIATION.fax}</li>
+            <li>
+              tel. {ASSOCIATION.phone} · fax {ASSOCIATION.fax}
+            </li>
             <li>
               <a href={`mailto:${ASSOCIATION.email}`} className="text-primary hover:underline">
                 {ASSOCIATION.email}

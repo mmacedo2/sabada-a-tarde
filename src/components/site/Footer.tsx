@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 
 import logo from "@/assets/sabado-logo.png";
-import { ASSOCIATION, SEASON, competitions } from "@/data/afpg";
+import { ASSOCIATION } from "@/data/afpg";
+import { useCatalog } from "@/lib/catalog";
 
 export function Footer() {
+  const { competitions, season } = useCatalog();
   return (
     <footer className="mt-24 border-t border-ink-border bg-ink text-ink-foreground">
       <div className="container-afpg grid gap-10 py-14 md:grid-cols-4">
@@ -20,11 +22,14 @@ export function Footer() {
             <p className="font-display text-lg font-extrabold leading-tight">
               Sábado à Tarde
               <br />
-              <span className="text-sm font-semibold text-ink-muted">Futebol Popular de Guimarães</span>
+              <span className="text-sm font-semibold text-ink-muted">
+                Futebol Popular de Guimarães
+              </span>
             </p>
           </div>
           <p className="mt-5 max-w-sm text-sm leading-relaxed text-ink-muted">
-            Plataforma independente e anónima dos adeptos do futebol popular de Guimarães. Sem ligação oficial à AFPG. Época {SEASON}.
+            Plataforma independente e anónima dos adeptos do futebol popular de Guimarães. Sem
+            ligação oficial à AFPG.{season && ` Época ${season.name}.`}
           </p>
         </div>
 
@@ -33,7 +38,11 @@ export function Footer() {
           <ul className="mt-4 space-y-2 text-sm text-ink-muted">
             {competitions.map((c) => (
               <li key={c.slug}>
-                <Link to={c.path} className="transition-colors hover:text-ink-foreground">
+                <Link
+                  to="/$competition"
+                  params={{ competition: c.slug }}
+                  className="transition-colors hover:text-ink-foreground"
+                >
                   {c.name}
                 </Link>
               </li>
@@ -46,7 +55,10 @@ export function Footer() {
           <ul className="mt-4 space-y-2 text-sm text-ink-muted">
             <li>{ASSOCIATION.address}</li>
             <li>
-              <a href={`tel:${ASSOCIATION.phone.replace(/\s/g, "")}`} className="hover:text-ink-foreground">
+              <a
+                href={`tel:${ASSOCIATION.phone.replace(/\s/g, "")}`}
+                className="hover:text-ink-foreground"
+              >
                 tel. {ASSOCIATION.phone}
               </a>
             </li>
@@ -67,7 +79,12 @@ export function Footer() {
       <div className="border-t border-ink-border">
         <div className="container-afpg flex flex-wrap items-center justify-between gap-2 py-6 text-xs text-ink-muted">
           <p>© {new Date().getFullYear()} Sábado à Tarde — Futebol Popular de Guimarães</p>
-          <p>Dados públicos baseados nos documentos oficiais da AFPG</p>
+          <p>
+            Dados públicos baseados nos documentos oficiais da AFPG ·{" "}
+            <Link to="/entrar" className="hover:text-ink-foreground">
+              Área reservada
+            </Link>
+          </p>
         </div>
       </div>
     </footer>

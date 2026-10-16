@@ -3,9 +3,12 @@ import { useMemo, useState } from "react";
 
 import { MatchCard } from "@/components/site/MatchCard";
 import { PageHeader } from "@/components/site/PageHeader";
-import { SEASON, clubs, competitions, matches, results, upcoming } from "@/data/afpg";
+import { useLiveRefresh } from "@/hooks/use-live-refresh";
+import { api, byDateAsc, byDateDesc, isLive, isPlayed, type Game } from "@/lib/api";
+import { useCatalog } from "@/lib/catalog";
 
 export const Route = createFileRoute("/resultados")({
+  loader: () => api.get<Game[]>("/api/games"),
   head: () => ({
     meta: [
       { title: "Resultados e próximos jogos — Sábado à Tarde" },
@@ -15,7 +18,10 @@ export const Route = createFileRoute("/resultados")({
           "Todos os resultados e próximos jogos das competições da AFPG, com filtros por competição, jornada e equipa.",
       },
       { property: "og:title", content: "Resultados — Sábado à Tarde" },
-      { property: "og:description", content: "Resultados e próximos jogos do futebol popular de Guimarães." },
+      {
+        property: "og:description",
+        content: "Resultados e próximos jogos do futebol popular de Guimarães.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/resultados" },
     ],
@@ -30,9 +36,22 @@ function ResultsPage() {
   const [club, setClub] = useState("todas");
   const [mode, setMode] = useState<"resultados" | "proximos">("resultados");
 
+  const matches = Route.useLoaderData();
+  const { season, clubs, competitions } = useCatalog();
+  useLiveRefresh(matches.some(isLive));
+
   const rounds = useMemo(
-    () => Array.from(new Set(matches.map((m) => m.round))),
-    [],
+    () => Array.from(new Set([...matches].sort(byDateAsc).map((m) => m.round))),
+    [matches],
+  );
+  // Games being played show under results, with their live score.
+  const results = useMemo(
+    () => matches.filter((m) => isPlayed(m) || isLive(m)).sort(byDateDesc),
+    [matches],
+  );
+  const upcoming = useMemo(
+    () => matches.filter((m) => !isPlayed(m) && !isLive(m)).sort(byDateAsc),
+    [matches],
   );
 
   const list = (mode === "resultados" ? results : upcoming).filter(
@@ -45,7 +64,7 @@ function ResultsPage() {
   return (
     <>
       <PageHeader
-        eyebrow={`Época ${SEASON}`}
+        eyebrow={season ? `Época ${season.name}` : undefined}
         title="Resultados"
         description="Consulte resultados e próximos jogos por competição, jornada ou equipa."
       />
@@ -88,7 +107,7 @@ function ResultsPage() {
             <option value="todas">Todas</option>
             {clubs.map((c) => (
               <option key={c.slug} value={c.slug}>
-                {c.short}
+                {c.shortName}
               </option>
             ))}
           </Select>

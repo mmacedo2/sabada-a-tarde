@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 
 import { Crest } from "@/components/site/Crest";
-import { clubBySlug, type StandingRow } from "@/data/afpg";
+import type { StandingRow } from "@/lib/api";
+import { useCatalog } from "@/lib/catalog";
 
 export function StandingsTable({
   rows,
@@ -10,26 +11,54 @@ export function StandingsTable({
   rows: StandingRow[];
   compact?: boolean;
 }) {
+  const { clubBySlug } = useCatalog();
+  if (rows.length === 0) {
+    return (
+      <p className="rounded-xl border border-dashed border-border bg-muted/50 p-6 text-sm text-muted-foreground">
+        Classificação disponível após a primeira jornada.
+      </p>
+    );
+  }
   return (
     <div className="-mx-5 overflow-x-auto rounded-none border-y border-border bg-card shadow-card sm:mx-0 sm:overflow-hidden sm:rounded-xl sm:border">
       <table className="w-full min-w-full border-collapse text-sm">
         <caption className="sr-only">Classificação da Super Liga AFPG</caption>
         <thead>
           <tr className="bg-ink text-ink-foreground">
-            <th scope="col" className="eyebrow px-3 py-3 text-left">#</th>
-            <th scope="col" className="eyebrow px-2 py-3 text-left">Equipa</th>
-            <th scope="col" className="eyebrow px-2 py-3 text-center">J</th>
+            <th scope="col" className="eyebrow px-3 py-3 text-left">
+              #
+            </th>
+            <th scope="col" className="eyebrow px-2 py-3 text-left">
+              Equipa
+            </th>
+            <th scope="col" className="eyebrow px-2 py-3 text-center">
+              J
+            </th>
             {!compact && (
               <>
-                <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">V</th>
-                <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">E</th>
-                <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">D</th>
-                <th scope="col" className="eyebrow hidden px-2 py-3 text-center sm:table-cell">GM</th>
-                <th scope="col" className="eyebrow hidden px-2 py-3 text-center sm:table-cell">GS</th>
+                <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">
+                  V
+                </th>
+                <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">
+                  E
+                </th>
+                <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">
+                  D
+                </th>
+                <th scope="col" className="eyebrow hidden px-2 py-3 text-center sm:table-cell">
+                  GM
+                </th>
+                <th scope="col" className="eyebrow hidden px-2 py-3 text-center sm:table-cell">
+                  GS
+                </th>
               </>
             )}
-            <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">DIF</th>
-            <th scope="col" className="eyebrow px-3 py-3 text-center">PTS</th>
+            <th scope="col" className="eyebrow hidden px-2 py-3 text-center xs:table-cell">
+              DIF
+            </th>
+            <th scope="col" className="eyebrow px-3 py-3 text-center">
+              PTS
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +67,10 @@ export function StandingsTable({
             if (!club) return null;
             const diff = row.goalsFor - row.goalsAgainst;
             return (
-              <tr key={row.club} className="border-t border-border transition-colors hover:bg-muted">
+              <tr
+                key={row.club}
+                className="border-t border-border transition-colors hover:bg-muted"
+              >
                 <td className="px-3 py-3">
                   <span
                     className={`stat inline-flex size-7 items-center justify-center rounded-md text-sm ${
@@ -57,7 +89,7 @@ export function StandingsTable({
                     className="flex items-center gap-2.5 font-semibold hover:text-primary"
                   >
                     <Crest club={club} size="xs" />
-                    <span className="truncate">{club.short}</span>
+                    <span className="truncate">{club.shortName}</span>
                   </Link>
                 </td>
                 <td className="stat px-2 py-3 text-center">{row.played}</td>
@@ -65,9 +97,15 @@ export function StandingsTable({
                   <>
                     <td className="stat hidden px-2 py-3 text-center xs:table-cell">{row.wins}</td>
                     <td className="stat hidden px-2 py-3 text-center xs:table-cell">{row.draws}</td>
-                    <td className="stat hidden px-2 py-3 text-center xs:table-cell">{row.losses}</td>
-                    <td className="stat hidden px-2 py-3 text-center sm:table-cell">{row.goalsFor}</td>
-                    <td className="stat hidden px-2 py-3 text-center sm:table-cell">{row.goalsAgainst}</td>
+                    <td className="stat hidden px-2 py-3 text-center xs:table-cell">
+                      {row.losses}
+                    </td>
+                    <td className="stat hidden px-2 py-3 text-center sm:table-cell">
+                      {row.goalsFor}
+                    </td>
+                    <td className="stat hidden px-2 py-3 text-center sm:table-cell">
+                      {row.goalsAgainst}
+                    </td>
                   </>
                 )}
                 <td className="stat hidden px-2 py-3 text-center text-muted-foreground xs:table-cell">

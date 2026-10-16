@@ -6,10 +6,19 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+// In development the API runs separately (`npm run dev` in api/ or docker compose).
+const API_ORIGIN = process.env["API_ORIGIN"] ?? "http://127.0.0.1:8787";
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+  },
+  vite: {
+    server: {
+      // Keep the Host header so the API's same-origin check sees the page's own host.
+      proxy: { "/api": { target: API_ORIGIN, changeOrigin: false } },
+    },
   },
 });

@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { DocumentList } from "@/components/site/DocumentList";
 import { PageHeader } from "@/components/site/PageHeader";
-import { docCategories, documents, type DocCategory } from "@/data/afpg";
+import { api, type Doc } from "@/lib/api";
 
 export const Route = createFileRoute("/documentos")({
+  loader: () => api.get<Doc[]>("/api/documents"),
   head: () => ({
     meta: [
       { title: "Documentos oficiais — Sábado à Tarde" },
@@ -15,7 +16,10 @@ export const Route = createFileRoute("/documentos")({
           "Comunicados, Conselho de Disciplina, regulamentos, impressos AFPG e FFPN, secretaria e interconcelhias.",
       },
       { property: "og:title", content: "Documentos oficiais — Sábado à Tarde" },
-      { property: "og:description", content: "Toda a documentação oficial da AFPG organizada por categoria." },
+      {
+        property: "og:description",
+        content: "Toda a documentação oficial da AFPG organizada por categoria.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/documentos" },
     ],
@@ -25,9 +29,10 @@ export const Route = createFileRoute("/documentos")({
 });
 
 function DocumentsPage() {
-  const [category, setCategory] = useState<DocCategory | "Todas">("Todas");
-  const docs =
-    category === "Todas" ? documents : documents.filter((d) => d.category === category);
+  const documents = Route.useLoaderData();
+  const docCategories = useMemo(() => [...new Set(documents.map((d) => d.category))], [documents]);
+  const [category, setCategory] = useState("Todas");
+  const docs = category === "Todas" ? documents : documents.filter((d) => d.category === category);
 
   return (
     <>
@@ -39,7 +44,7 @@ function DocumentsPage() {
 
       <section className="container-afpg py-14 md:py-16">
         <div className="mb-8 flex flex-wrap gap-2">
-          {(["Todas", ...docCategories] as const).map((c) => (
+          {["Todas", ...docCategories].map((c) => (
             <button
               key={c}
               onClick={() => setCategory(c)}

@@ -10,24 +10,47 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CompetitionRouteImport } from './routes/$competition'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AssociacaoRouteImport } from './routes/associacao'
 import { Route as ClassificacoesRouteImport } from './routes/classificacoes'
 import { Route as ContactosRouteImport } from './routes/contactos'
 import { Route as DocumentosRouteImport } from './routes/documentos'
+import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as GaleriaRouteImport } from './routes/galeria'
-import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as ResultadosRouteImport } from './routes/resultados'
-import { Route as SuperLigaRouteImport } from './routes/super-liga'
-import { Route as TacaAssociacaoRouteImport } from './routes/taca-associacao'
-import { Route as TacaCidadeBercoRouteImport } from './routes/taca-cidade-berco'
-import { Route as TacaDisciplinaRouteImport } from './routes/taca-disciplina'
-import { Route as TrofeuJoaoFernandesRouteImport } from './routes/trofeu-joao-fernandes'
+import { Route as TransferenciasRouteImport } from './routes/transferencias'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminClubesRouteImport } from './routes/admin.clubes'
+import { Route as AdminCompeticoesRouteImport } from './routes/admin.competicoes'
+import { Route as AdminContaRouteImport } from './routes/admin.conta'
+import { Route as AdminDocumentosRouteImport } from './routes/admin.documentos'
+import { Route as AdminJogadoresRouteImport } from './routes/admin.jogadores'
+import { Route as AdminRegistoRouteImport } from './routes/admin.registo'
+import { Route as AdminTransferenciasRouteImport } from './routes/admin.transferencias'
+import { Route as AdminUtilizadoresRouteImport } from './routes/admin.utilizadores'
 import { Route as ClubesIndexRouteImport } from './routes/clubes.index'
 import { Route as ClubesSlugRouteImport } from './routes/clubes.$slug'
+import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
+import { Route as NoticiasSlugRouteImport } from './routes/noticias.$slug'
+import { Route as AdminJogosIndexRouteImport } from './routes/admin.jogos.index'
+import { Route as AdminJogosIdRouteImport } from './routes/admin.jogos.$id'
+import { Route as AdminNoticiasIndexRouteImport } from './routes/admin.noticias.index'
+import { Route as AdminNoticiasIdRouteImport } from './routes/admin.noticias.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompetitionRoute = CompetitionRouteImport.update({
+  id: '/$competition',
+  path: '/$competition',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AssociacaoRoute = AssociacaoRouteImport.update({
@@ -50,14 +73,14 @@ const DocumentosRoute = DocumentosRouteImport.update({
   path: '/documentos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GaleriaRoute = GaleriaRouteImport.update({
   id: '/galeria',
   path: '/galeria',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NoticiasRoute = NoticiasRouteImport.update({
-  id: '/noticias',
-  path: '/noticias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultadosRoute = ResultadosRouteImport.update({
@@ -65,30 +88,55 @@ const ResultadosRoute = ResultadosRouteImport.update({
   path: '/resultados',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SuperLigaRoute = SuperLigaRouteImport.update({
-  id: '/super-liga',
-  path: '/super-liga',
+const TransferenciasRoute = TransferenciasRouteImport.update({
+  id: '/transferencias',
+  path: '/transferencias',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TacaAssociacaoRoute = TacaAssociacaoRouteImport.update({
-  id: '/taca-associacao',
-  path: '/taca-associacao',
-  getParentRoute: () => rootRouteImport,
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
-const TacaCidadeBercoRoute = TacaCidadeBercoRouteImport.update({
-  id: '/taca-cidade-berco',
-  path: '/taca-cidade-berco',
-  getParentRoute: () => rootRouteImport,
+const AdminClubesRoute = AdminClubesRouteImport.update({
+  id: '/clubes',
+  path: '/clubes',
+  getParentRoute: () => AdminRoute,
 } as any)
-const TacaDisciplinaRoute = TacaDisciplinaRouteImport.update({
-  id: '/taca-disciplina',
-  path: '/taca-disciplina',
-  getParentRoute: () => rootRouteImport,
+const AdminCompeticoesRoute = AdminCompeticoesRouteImport.update({
+  id: '/competicoes',
+  path: '/competicoes',
+  getParentRoute: () => AdminRoute,
 } as any)
-const TrofeuJoaoFernandesRoute = TrofeuJoaoFernandesRouteImport.update({
-  id: '/trofeu-joao-fernandes',
-  path: '/trofeu-joao-fernandes',
-  getParentRoute: () => rootRouteImport,
+const AdminContaRoute = AdminContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDocumentosRoute = AdminDocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJogadoresRoute = AdminJogadoresRouteImport.update({
+  id: '/jogadores',
+  path: '/jogadores',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRegistoRoute = AdminRegistoRouteImport.update({
+  id: '/registo',
+  path: '/registo',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTransferenciasRoute = AdminTransferenciasRouteImport.update({
+  id: '/transferencias',
+  path: '/transferencias',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUtilizadoresRoute = AdminUtilizadoresRouteImport.update({
+  id: '/utilizadores',
+  path: '/utilizadores',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ClubesIndexRoute = ClubesIndexRouteImport.update({
   id: '/clubes/',
@@ -100,129 +148,235 @@ const ClubesSlugRoute = ClubesSlugRouteImport.update({
   path: '/clubes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
+  id: '/noticias/',
+  path: '/noticias/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoticiasSlugRoute = NoticiasSlugRouteImport.update({
+  id: '/noticias/$slug',
+  path: '/noticias/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminJogosIndexRoute = AdminJogosIndexRouteImport.update({
+  id: '/jogos/',
+  path: '/jogos/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJogosIdRoute = AdminJogosIdRouteImport.update({
+  id: '/jogos/$id',
+  path: '/jogos/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNoticiasIndexRoute = AdminNoticiasIndexRouteImport.update({
+  id: '/noticias/',
+  path: '/noticias/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNoticiasIdRoute = AdminNoticiasIdRouteImport.update({
+  id: '/noticias/$id',
+  path: '/noticias/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$competition': typeof CompetitionRoute
+  '/admin': typeof AdminRouteWithChildren
   '/associacao': typeof AssociacaoRoute
   '/classificacoes': typeof ClassificacoesRoute
   '/contactos': typeof ContactosRoute
   '/documentos': typeof DocumentosRoute
+  '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
-  '/noticias': typeof NoticiasRoute
   '/resultados': typeof ResultadosRoute
-  '/super-liga': typeof SuperLigaRoute
-  '/taca-associacao': typeof TacaAssociacaoRoute
-  '/taca-cidade-berco': typeof TacaCidadeBercoRoute
-  '/taca-disciplina': typeof TacaDisciplinaRoute
-  '/trofeu-joao-fernandes': typeof TrofeuJoaoFernandesRoute
+  '/transferencias': typeof TransferenciasRoute
+  '/admin/clubes': typeof AdminClubesRoute
+  '/admin/competicoes': typeof AdminCompeticoesRoute
+  '/admin/conta': typeof AdminContaRoute
+  '/admin/documentos': typeof AdminDocumentosRoute
+  '/admin/jogadores': typeof AdminJogadoresRoute
+  '/admin/registo': typeof AdminRegistoRoute
+  '/admin/transferencias': typeof AdminTransferenciasRoute
+  '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/clubes/$slug': typeof ClubesSlugRoute
+  '/noticias/$slug': typeof NoticiasSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/clubes/': typeof ClubesIndexRoute
+  '/noticias/': typeof NoticiasIndexRoute
+  '/admin/jogos/$id': typeof AdminJogosIdRoute
+  '/admin/noticias/$id': typeof AdminNoticiasIdRoute
+  '/admin/jogos/': typeof AdminJogosIndexRoute
+  '/admin/noticias/': typeof AdminNoticiasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$competition': typeof CompetitionRoute
   '/associacao': typeof AssociacaoRoute
   '/classificacoes': typeof ClassificacoesRoute
   '/contactos': typeof ContactosRoute
   '/documentos': typeof DocumentosRoute
+  '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
-  '/noticias': typeof NoticiasRoute
   '/resultados': typeof ResultadosRoute
-  '/super-liga': typeof SuperLigaRoute
-  '/taca-associacao': typeof TacaAssociacaoRoute
-  '/taca-cidade-berco': typeof TacaCidadeBercoRoute
-  '/taca-disciplina': typeof TacaDisciplinaRoute
-  '/trofeu-joao-fernandes': typeof TrofeuJoaoFernandesRoute
+  '/transferencias': typeof TransferenciasRoute
+  '/admin/clubes': typeof AdminClubesRoute
+  '/admin/competicoes': typeof AdminCompeticoesRoute
+  '/admin/conta': typeof AdminContaRoute
+  '/admin/documentos': typeof AdminDocumentosRoute
+  '/admin/jogadores': typeof AdminJogadoresRoute
+  '/admin/registo': typeof AdminRegistoRoute
+  '/admin/transferencias': typeof AdminTransferenciasRoute
+  '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/clubes/$slug': typeof ClubesSlugRoute
+  '/noticias/$slug': typeof NoticiasSlugRoute
+  '/admin': typeof AdminIndexRoute
   '/clubes': typeof ClubesIndexRoute
+  '/noticias': typeof NoticiasIndexRoute
+  '/admin/jogos/$id': typeof AdminJogosIdRoute
+  '/admin/noticias/$id': typeof AdminNoticiasIdRoute
+  '/admin/jogos': typeof AdminJogosIndexRoute
+  '/admin/noticias': typeof AdminNoticiasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$competition': typeof CompetitionRoute
+  '/admin': typeof AdminRouteWithChildren
   '/associacao': typeof AssociacaoRoute
   '/classificacoes': typeof ClassificacoesRoute
   '/contactos': typeof ContactosRoute
   '/documentos': typeof DocumentosRoute
+  '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
-  '/noticias': typeof NoticiasRoute
   '/resultados': typeof ResultadosRoute
-  '/super-liga': typeof SuperLigaRoute
-  '/taca-associacao': typeof TacaAssociacaoRoute
-  '/taca-cidade-berco': typeof TacaCidadeBercoRoute
-  '/taca-disciplina': typeof TacaDisciplinaRoute
-  '/trofeu-joao-fernandes': typeof TrofeuJoaoFernandesRoute
+  '/transferencias': typeof TransferenciasRoute
+  '/admin/clubes': typeof AdminClubesRoute
+  '/admin/competicoes': typeof AdminCompeticoesRoute
+  '/admin/conta': typeof AdminContaRoute
+  '/admin/documentos': typeof AdminDocumentosRoute
+  '/admin/jogadores': typeof AdminJogadoresRoute
+  '/admin/registo': typeof AdminRegistoRoute
+  '/admin/transferencias': typeof AdminTransferenciasRoute
+  '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/clubes/$slug': typeof ClubesSlugRoute
+  '/noticias/$slug': typeof NoticiasSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/clubes/': typeof ClubesIndexRoute
+  '/noticias/': typeof NoticiasIndexRoute
+  '/admin/jogos/$id': typeof AdminJogosIdRoute
+  '/admin/noticias/$id': typeof AdminNoticiasIdRoute
+  '/admin/jogos/': typeof AdminJogosIndexRoute
+  '/admin/noticias/': typeof AdminNoticiasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$competition'
+    | '/admin'
     | '/associacao'
     | '/classificacoes'
     | '/contactos'
     | '/documentos'
+    | '/entrar'
     | '/galeria'
-    | '/noticias'
     | '/resultados'
-    | '/super-liga'
-    | '/taca-associacao'
-    | '/taca-cidade-berco'
-    | '/taca-disciplina'
-    | '/trofeu-joao-fernandes'
+    | '/transferencias'
+    | '/admin/clubes'
+    | '/admin/competicoes'
+    | '/admin/conta'
+    | '/admin/documentos'
+    | '/admin/jogadores'
+    | '/admin/registo'
+    | '/admin/transferencias'
+    | '/admin/utilizadores'
     | '/clubes/$slug'
+    | '/noticias/$slug'
+    | '/admin/'
     | '/clubes/'
+    | '/noticias/'
+    | '/admin/jogos/$id'
+    | '/admin/noticias/$id'
+    | '/admin/jogos/'
+    | '/admin/noticias/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$competition'
     | '/associacao'
     | '/classificacoes'
     | '/contactos'
     | '/documentos'
+    | '/entrar'
     | '/galeria'
-    | '/noticias'
     | '/resultados'
-    | '/super-liga'
-    | '/taca-associacao'
-    | '/taca-cidade-berco'
-    | '/taca-disciplina'
-    | '/trofeu-joao-fernandes'
+    | '/transferencias'
+    | '/admin/clubes'
+    | '/admin/competicoes'
+    | '/admin/conta'
+    | '/admin/documentos'
+    | '/admin/jogadores'
+    | '/admin/registo'
+    | '/admin/transferencias'
+    | '/admin/utilizadores'
     | '/clubes/$slug'
+    | '/noticias/$slug'
+    | '/admin'
     | '/clubes'
+    | '/noticias'
+    | '/admin/jogos/$id'
+    | '/admin/noticias/$id'
+    | '/admin/jogos'
+    | '/admin/noticias'
   id:
     | '__root__'
     | '/'
+    | '/$competition'
+    | '/admin'
     | '/associacao'
     | '/classificacoes'
     | '/contactos'
     | '/documentos'
+    | '/entrar'
     | '/galeria'
-    | '/noticias'
     | '/resultados'
-    | '/super-liga'
-    | '/taca-associacao'
-    | '/taca-cidade-berco'
-    | '/taca-disciplina'
-    | '/trofeu-joao-fernandes'
+    | '/transferencias'
+    | '/admin/clubes'
+    | '/admin/competicoes'
+    | '/admin/conta'
+    | '/admin/documentos'
+    | '/admin/jogadores'
+    | '/admin/registo'
+    | '/admin/transferencias'
+    | '/admin/utilizadores'
     | '/clubes/$slug'
+    | '/noticias/$slug'
+    | '/admin/'
     | '/clubes/'
+    | '/noticias/'
+    | '/admin/jogos/$id'
+    | '/admin/noticias/$id'
+    | '/admin/jogos/'
+    | '/admin/noticias/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CompetitionRoute: typeof CompetitionRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AssociacaoRoute: typeof AssociacaoRoute
   ClassificacoesRoute: typeof ClassificacoesRoute
   ContactosRoute: typeof ContactosRoute
   DocumentosRoute: typeof DocumentosRoute
+  EntrarRoute: typeof EntrarRoute
   GaleriaRoute: typeof GaleriaRoute
-  NoticiasRoute: typeof NoticiasRoute
   ResultadosRoute: typeof ResultadosRoute
-  SuperLigaRoute: typeof SuperLigaRoute
-  TacaAssociacaoRoute: typeof TacaAssociacaoRoute
-  TacaCidadeBercoRoute: typeof TacaCidadeBercoRoute
-  TacaDisciplinaRoute: typeof TacaDisciplinaRoute
-  TrofeuJoaoFernandesRoute: typeof TrofeuJoaoFernandesRoute
+  TransferenciasRoute: typeof TransferenciasRoute
   ClubesSlugRoute: typeof ClubesSlugRoute
+  NoticiasSlugRoute: typeof NoticiasSlugRoute
   ClubesIndexRoute: typeof ClubesIndexRoute
+  NoticiasIndexRoute: typeof NoticiasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -232,6 +386,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$competition': {
+      id: '/$competition'
+      path: '/$competition'
+      fullPath: '/$competition'
+      preLoaderRoute: typeof CompetitionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/associacao': {
@@ -262,18 +430,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocumentosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/galeria': {
       id: '/galeria'
       path: '/galeria'
       fullPath: '/galeria'
       preLoaderRoute: typeof GaleriaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/noticias': {
-      id: '/noticias'
-      path: '/noticias'
-      fullPath: '/noticias'
-      preLoaderRoute: typeof NoticiasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resultados': {
@@ -283,40 +451,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultadosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/super-liga': {
-      id: '/super-liga'
-      path: '/super-liga'
-      fullPath: '/super-liga'
-      preLoaderRoute: typeof SuperLigaRouteImport
+    '/transferencias': {
+      id: '/transferencias'
+      path: '/transferencias'
+      fullPath: '/transferencias'
+      preLoaderRoute: typeof TransferenciasRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/taca-associacao': {
-      id: '/taca-associacao'
-      path: '/taca-associacao'
-      fullPath: '/taca-associacao'
-      preLoaderRoute: typeof TacaAssociacaoRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/taca-cidade-berco': {
-      id: '/taca-cidade-berco'
-      path: '/taca-cidade-berco'
-      fullPath: '/taca-cidade-berco'
-      preLoaderRoute: typeof TacaCidadeBercoRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/clubes': {
+      id: '/admin/clubes'
+      path: '/clubes'
+      fullPath: '/admin/clubes'
+      preLoaderRoute: typeof AdminClubesRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/taca-disciplina': {
-      id: '/taca-disciplina'
-      path: '/taca-disciplina'
-      fullPath: '/taca-disciplina'
-      preLoaderRoute: typeof TacaDisciplinaRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/competicoes': {
+      id: '/admin/competicoes'
+      path: '/competicoes'
+      fullPath: '/admin/competicoes'
+      preLoaderRoute: typeof AdminCompeticoesRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/trofeu-joao-fernandes': {
-      id: '/trofeu-joao-fernandes'
-      path: '/trofeu-joao-fernandes'
-      fullPath: '/trofeu-joao-fernandes'
-      preLoaderRoute: typeof TrofeuJoaoFernandesRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/conta': {
+      id: '/admin/conta'
+      path: '/conta'
+      fullPath: '/admin/conta'
+      preLoaderRoute: typeof AdminContaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/documentos': {
+      id: '/admin/documentos'
+      path: '/documentos'
+      fullPath: '/admin/documentos'
+      preLoaderRoute: typeof AdminDocumentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/jogadores': {
+      id: '/admin/jogadores'
+      path: '/jogadores'
+      fullPath: '/admin/jogadores'
+      preLoaderRoute: typeof AdminJogadoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/registo': {
+      id: '/admin/registo'
+      path: '/registo'
+      fullPath: '/admin/registo'
+      preLoaderRoute: typeof AdminRegistoRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/transferencias': {
+      id: '/admin/transferencias'
+      path: '/transferencias'
+      fullPath: '/admin/transferencias'
+      preLoaderRoute: typeof AdminTransferenciasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/utilizadores': {
+      id: '/admin/utilizadores'
+      path: '/utilizadores'
+      fullPath: '/admin/utilizadores'
+      preLoaderRoute: typeof AdminUtilizadoresRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/clubes/': {
       id: '/clubes/'
@@ -332,25 +535,101 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClubesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/noticias/': {
+      id: '/noticias/'
+      path: '/noticias'
+      fullPath: '/noticias/'
+      preLoaderRoute: typeof NoticiasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/noticias/$slug': {
+      id: '/noticias/$slug'
+      path: '/noticias/$slug'
+      fullPath: '/noticias/$slug'
+      preLoaderRoute: typeof NoticiasSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/jogos/': {
+      id: '/admin/jogos/'
+      path: '/jogos'
+      fullPath: '/admin/jogos/'
+      preLoaderRoute: typeof AdminJogosIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/jogos/$id': {
+      id: '/admin/jogos/$id'
+      path: '/jogos/$id'
+      fullPath: '/admin/jogos/$id'
+      preLoaderRoute: typeof AdminJogosIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/noticias/': {
+      id: '/admin/noticias/'
+      path: '/noticias'
+      fullPath: '/admin/noticias/'
+      preLoaderRoute: typeof AdminNoticiasIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/noticias/$id': {
+      id: '/admin/noticias/$id'
+      path: '/noticias/$id'
+      fullPath: '/admin/noticias/$id'
+      preLoaderRoute: typeof AdminNoticiasIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminClubesRoute: typeof AdminClubesRoute
+  AdminCompeticoesRoute: typeof AdminCompeticoesRoute
+  AdminContaRoute: typeof AdminContaRoute
+  AdminDocumentosRoute: typeof AdminDocumentosRoute
+  AdminJogadoresRoute: typeof AdminJogadoresRoute
+  AdminRegistoRoute: typeof AdminRegistoRoute
+  AdminTransferenciasRoute: typeof AdminTransferenciasRoute
+  AdminUtilizadoresRoute: typeof AdminUtilizadoresRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminJogosIdRoute: typeof AdminJogosIdRoute
+  AdminNoticiasIdRoute: typeof AdminNoticiasIdRoute
+  AdminJogosIndexRoute: typeof AdminJogosIndexRoute
+  AdminNoticiasIndexRoute: typeof AdminNoticiasIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminClubesRoute: AdminClubesRoute,
+  AdminCompeticoesRoute: AdminCompeticoesRoute,
+  AdminContaRoute: AdminContaRoute,
+  AdminDocumentosRoute: AdminDocumentosRoute,
+  AdminJogadoresRoute: AdminJogadoresRoute,
+  AdminRegistoRoute: AdminRegistoRoute,
+  AdminTransferenciasRoute: AdminTransferenciasRoute,
+  AdminUtilizadoresRoute: AdminUtilizadoresRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminJogosIdRoute: AdminJogosIdRoute,
+  AdminNoticiasIdRoute: AdminNoticiasIdRoute,
+  AdminJogosIndexRoute: AdminJogosIndexRoute,
+  AdminNoticiasIndexRoute: AdminNoticiasIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CompetitionRoute: CompetitionRoute,
+  AdminRoute: AdminRouteWithChildren,
   AssociacaoRoute: AssociacaoRoute,
   ClassificacoesRoute: ClassificacoesRoute,
   ContactosRoute: ContactosRoute,
   DocumentosRoute: DocumentosRoute,
+  EntrarRoute: EntrarRoute,
   GaleriaRoute: GaleriaRoute,
-  NoticiasRoute: NoticiasRoute,
   ResultadosRoute: ResultadosRoute,
-  SuperLigaRoute: SuperLigaRoute,
-  TacaAssociacaoRoute: TacaAssociacaoRoute,
-  TacaCidadeBercoRoute: TacaCidadeBercoRoute,
-  TacaDisciplinaRoute: TacaDisciplinaRoute,
-  TrofeuJoaoFernandesRoute: TrofeuJoaoFernandesRoute,
+  TransferenciasRoute: TransferenciasRoute,
   ClubesSlugRoute: ClubesSlugRoute,
+  NoticiasSlugRoute: NoticiasSlugRoute,
   ClubesIndexRoute: ClubesIndexRoute,
+  NoticiasIndexRoute: NoticiasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

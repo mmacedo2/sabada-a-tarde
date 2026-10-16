@@ -5,17 +5,33 @@ import { Crest } from "@/components/site/Crest";
 import { MatchCard } from "@/components/site/MatchCard";
 import { SectionTitle } from "@/components/site/PageHeader";
 import { StandingsTable } from "@/components/site/StandingsTable";
+import { formatDateTime } from "@/data/afpg";
+import { useLiveRefresh } from "@/hooks/use-live-refresh";
 import {
-  SEASON,
-  clubs,
-  competitions,
-  documents,
-  results,
-  superLigaStandings,
-  upcoming,
-} from "@/data/afpg";
+  api,
+  byDateAsc,
+  byDateDesc,
+  isLive,
+  isPlayed,
+  type ArticleSummary,
+  type Doc,
+  type Game,
+  competitionKindLabel,
+  leagueLabel,
+  loadMainLeague,
+} from "@/lib/api";
+import { useCatalog } from "@/lib/catalog";
 
 export const Route = createFileRoute("/")({
+  loader: async ({ context }) => {
+    const [games, { league, standings }, articles, documents] = await Promise.all([
+      api.get<Game[]>("/api/games"),
+      loadMainLeague(context.queryClient),
+      api.get<ArticleSummary[]>("/api/articles?limit=3"),
+      api.get<Doc[]>("/api/documents"),
+    ]);
+    return { games, league, standings, articles, documents };
+  },
   head: () => ({
     meta: [
       { title: "Sábado à Tarde — Futebol Popular de Guimarães" },
@@ -27,7 +43,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Sábado à Tarde — Futebol Popular de Guimarães" },
       {
         property: "og:description",
-        content: "Paixão, competição e comunidade. A plataforma dos adeptos do futebol popular de Guimarães.",
+        content:
+          "Paixão, competição e comunidade. A plataforma dos adeptos do futebol popular de Guimarães.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "/" },
@@ -38,8 +55,18 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const { games, league, standings, articles, documents } = Route.useLoaderData();
+  const { season, clubs, competitions } = useCatalog();
+  const live = games.filter(isLive);
+  useLiveRefresh(live.length > 0);
+
+  const results = games.filter(isPlayed).sort(byDateDesc);
   const lastRound = results[0]?.round;
   const lastResults = results.filter((m) => m.round === lastRound);
+  const upcoming = games
+    .filter((g) => g.status === "scheduled")
+    .sort(byDateAsc)
+    .slice(0, 6);
   const comunicados = documents.slice(0, 6);
 
   return (
@@ -55,14 +82,16 @@ function Home() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/30" />
         <div className="container-afpg relative flex min-h-[72vh] flex-col justify-end py-16 md:min-h-[80vh] md:py-24">
-          <p className="eyebrow animate-fade-up text-primary">Futebol Popular de Guimarães · Época {SEASON}</p>
+          <p className="eyebrow animate-fade-up text-primary">
+            Futebol Popular de Guimarães{season && ` · Época ${season.name}`}
+          </p>
           <h1 className="mt-4 max-w-4xl animate-fade-up font-display text-4xl font-extrabold uppercase leading-[0.92] sm:text-6xl lg:text-7xl">
             Sábado
-            <br />
-            à Tarde
+            <br />à Tarde
           </h1>
           <p className="mt-6 max-w-xl animate-fade-up text-lg text-ink-muted">
-            Futebol Popular de Guimarães — a plataforma independente feita por e para os adeptos. Jogos, resultados, classificações e as histórias de cada freguesia.
+            Futebol Popular de Guimarães — a plataforma independente feita por e para os adeptos.
+            Jogos, resultados, classificações e as histórias de cada freguesia.
           </p>
           <div className="mt-9 flex animate-fade-up flex-wrap gap-3">
             <Link
@@ -80,6 +109,17 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {live.length > 0 && (
+        <section className="container-afpg pt-16 md:pt-20">
+          <SectionTitle eyebrow="A decorrer" title="Jogos ao vivo" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {live.map((m) => (
+              <MatchCard key={m.id} match={m} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* RESULTADOS RECENTES */}
       <section className="container-afpg py-16 md:py-20">
@@ -115,18 +155,24 @@ function Home() {
             </p>
           )}
         </div>
-        <div>
-          <SectionTitle
-            eyebrow="Super Liga · 1ª Divisão"
-            title="Classificação"
-            action={
-              <Link to="/super-liga" className="eyebrow text-primary hover:underline">
-                Competição →
-              </Link>
-            }
-          />
-          <StandingsTable rows={superLigaStandings} compact />
-        </div>
+        {league && (
+          <div>
+            <SectionTitle
+              eyebrow={leagueLabel(league)}
+              title="Classificação"
+              action={
+                <Link
+                  to="/$competition"
+                  params={{ competition: league.slug }}
+                  className="eyebrow text-primary hover:underline"
+                >
+                  Competição →
+                </Link>
+              }
+            />
+            <StandingsTable rows={standings} compact />
+          </div>
+        )}
       </section>
 
       {/* COMPETIÇÕES */}
@@ -142,18 +188,21 @@ function Home() {
             {competitions.map((c) => (
               <Link
                 key={c.slug}
-                to={c.path}
+                to="/$competition"
+                params={{ competition: c.slug }}
                 className="group flex flex-col rounded-xl border border-ink-border bg-white/[0.03] p-6 transition-all hover:-translate-y-1 hover:border-primary/50 hover:bg-white/[0.06]"
               >
-                <img
-                  src={c.mark}
-                  alt={`Símbolo da ${c.name}`}
-                  loading="lazy"
-                  width={1024}
-                  height={768}
-                  className="h-24 w-auto self-start object-contain brightness-0 invert transition-transform group-hover:scale-105"
-                />
-                <p className="eyebrow mt-6 text-primary">{c.kind}</p>
+                {c.logoUrl && (
+                  <img
+                    src={c.logoUrl}
+                    alt={`Símbolo da ${c.name}`}
+                    loading="lazy"
+                    width={1024}
+                    height={768}
+                    className="h-24 w-auto self-start object-contain brightness-0 invert transition-transform group-hover:scale-105"
+                  />
+                )}
+                <p className="eyebrow mt-6 text-primary">{competitionKindLabel[c.kind]}</p>
                 <h3 className="mt-1 font-display text-xl font-extrabold uppercase">{c.name}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-ink-muted">{c.tagline}</p>
               </Link>
@@ -184,11 +233,49 @@ function Home() {
               <Crest club={club} size="lg" className="transition-transform group-hover:scale-105" />
               <h3 className="mt-4 text-sm font-bold leading-tight">{club.name}</h3>
               <p className="mt-1 text-xs text-muted-foreground">{club.locality}</p>
-              <p className="eyebrow mt-3 text-primary">Super Liga</p>
             </Link>
           ))}
         </div>
       </section>
+
+      {/* NOTÍCIAS */}
+      {articles.length > 0 && (
+        <section className="container-afpg pb-16 md:pb-20">
+          <SectionTitle
+            eyebrow="Sala de imprensa"
+            title="Últimas notícias"
+            action={
+              <Link to="/noticias" className="eyebrow text-primary hover:underline">
+                Todas as notícias →
+              </Link>
+            }
+          />
+          <div className="grid gap-4 md:grid-cols-3">
+            {articles.map((a) => (
+              <Link
+                key={a.id}
+                to="/noticias/$slug"
+                params={{ slug: a.slug }}
+                className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-lift"
+              >
+                {a.coverUrl && (
+                  <img
+                    src={a.coverUrl}
+                    alt=""
+                    loading="lazy"
+                    className="aspect-video w-full object-cover"
+                  />
+                )}
+                <div className="flex flex-1 flex-col p-6">
+                  <p className="eyebrow text-primary">{formatDateTime(a.publishedAt)}</p>
+                  <h3 className="mt-3 font-display text-lg font-bold leading-snug">{a.title}</h3>
+                  {a.summary && <p className="mt-2 text-sm text-muted-foreground">{a.summary}</p>}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* COMUNICADOS */}
       <section className="container-afpg pb-4">
@@ -204,7 +291,7 @@ function Home() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {comunicados.map((doc) => (
             <a
-              key={doc.url + doc.title}
+              key={doc.id}
               href={doc.url}
               target="_blank"
               rel="noreferrer"
