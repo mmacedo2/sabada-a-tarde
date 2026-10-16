@@ -28,6 +28,16 @@ const eventLabel: Record<GameEventType, string> = {
 };
 
 /** The buttons a match-day admin needs, in the order a game happens. */
+const PLAYED: GameStatus[] = ["live", "halftime", "finished"];
+
+const UNDO_WARNING =
+  "Marcar este jogo como não jogado? O resultado, os penáltis e todos os golos e cartões registados " +
+  "serão apagados, e o jogo deixa de contar para a classificação.";
+
+/** Moving a played game to a not-played state wipes its result, so ask first. */
+const confirmUnplayed = (from: GameStatus, to: GameStatus) =>
+  !PLAYED.includes(from) || PLAYED.includes(to) || window.confirm(UNDO_WARNING);
+
 const transitions: { label: string; to: GameStatus; from: GameStatus[] }[] = [
   { label: "Iniciar jogo", to: "live", from: ["scheduled", "postponed"] },
   { label: "Intervalo", to: "halftime", from: ["live"] },
@@ -36,6 +46,8 @@ const transitions: { label: string; to: GameStatus; from: GameStatus[] }[] = [
   { label: "Reabrir", to: "live", from: ["finished"] },
   { label: "Adiar", to: "postponed", from: ["scheduled"] },
   { label: "Cancelar", to: "cancelled", from: ["scheduled", "postponed"] },
+  { label: "Voltar a agendar", to: "scheduled", from: ["postponed", "cancelled"] },
+  { label: "Marcar como não jogado", to: "scheduled", from: PLAYED },
 ];
 
 function GameAdmin() {
@@ -123,7 +135,7 @@ function GameAdmin() {
                 key={t.label}
                 variant={t.to === "live" || t.to === "finished" ? "default" : "outline"}
                 disabled={patch.isPending || (t.to === "live" && !decided)}
-                onClick={() => patch.mutate({ status: t.to })}
+                onClick={() => confirmUnplayed(g.status, t.to) && patch.mutate({ status: t.to })}
               >
                 {t.label}
               </Button>
@@ -191,7 +203,7 @@ function GameAdmin() {
             competitions={competitions.data}
             pending={save.isPending}
             submitLabel="Guardar"
-            onSubmit={(input) => save.mutate(input)}
+            onSubmit={(input) => confirmUnplayed(g.status, input.status) && save.mutate(input)}
           />
         )}
       </AdminSection>

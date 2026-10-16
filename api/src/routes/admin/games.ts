@@ -2,7 +2,7 @@ import { Hono } from "hono";
 
 import type { AppEnv } from "../../env";
 import { audit } from "../../lib/audit";
-import { allToApi, deleteRow, insertRow, NOW_SQL, toApi, updateRow } from "../../lib/db";
+import { allToApi, deleteRow, insertRow, NOW_SQL, toApi, updateStatement } from "../../lib/db";
 import { HttpError, notFound, parseId } from "../../lib/http";
 import { currentSeasonId, GAME_SELECT, gamesQuery, resolveSeasonId } from "../../lib/queries";
 import { body } from "../../lib/validate";
@@ -30,21 +30,31 @@ async function loadGame(db: D1Database, id: number) {
   return toApi<GameRow & Record<string, unknown>>(row);
 }
 
-/** A game that kicks off with no score entered starts at 0-0. */
-function withKickoffScore<
-  T extends {
-    status?: string | undefined;
-    homeGoals?: number | null | undefined;
-    awayGoals?: number | null | undefined;
-  },
->(input: T, current?: GameRow): T {
+type ScoreFields = {
+  status?: string | undefined;
+  homeGoals?: number | null | undefined;
+  awayGoals?: number | null | undefined;
+  homePenalties?: number | null | undefined;
+  awayPenalties?: number | null | undefined;
+};
+
+const isPlayed = (status: string | undefined) => !!status && startedStatuses.includes(status);
+
+/**
+ * A game that kicks off with no score entered starts at 0-0. A game that was not
+ * played (scheduled, postponed, cancelled) has no score at all, so moving a game
+ * back to one of those states undoes a result entered by mistake.
+ */
+function normalizeScore<T extends ScoreFields>(input: T, current?: GameRow): T {
   const status = input.status ?? current?.status;
-  if (!status || !startedStatuses.includes(status)) return input;
-  return {
-    ...input,
-    homeGoals: input.homeGoals ?? current?.homeGoals ?? 0,
-    awayGoals: input.awayGoals ?? current?.awayGoals ?? 0,
-  };
+  if (isPlayed(status)) {
+    return {
+      ...input,
+      homeGoals: input.homeGoals ?? current?.homeGoals ?? 0,
+      awayGoals: input.awayGoals ?? current?.awayGoals ?? 0,
+    };
+  }
+  return { ...input, homeGoals: null, awayGoals: null, homePenalties: null, awayPenalties: null };
 }
 
 gameRoutes.get("/", async (c) => {
@@ -72,7 +82,7 @@ gameRoutes.get("/:id", async (c) => {
 });
 
 gameRoutes.post("/", async (c) => {
-  const input = withKickoffScore(await body(c, gameCreateSchema));
+  const input = normalizeScore(await body(c, gameCreateSchema));
   const id = await insertRow(c.env.DB, "games", {
     ...input,
     seasonId: input.seasonId ?? (await currentSeasonId(c.env.DB)),
@@ -83,11 +93,17 @@ gameRoutes.post("/", async (c) => {
 
 gameRoutes.patch("/:id", async (c) => {
   const id = parseId(c.req.param("id"));
-  const current = await loadGame(c.env.DB, id);
-  const input = withKickoffScore(await body(c, gameUpdateSchema), current);
-  await updateRow(c.env.DB, "games", id, input);
-  await audit(c, "update", "game", id, input);
-  return c.json(await loadGame(c.env.DB, id));
+  const db = c.env.DB;
+  const current = await loadGame(db, id);
+  const input = normalizeScore(await body(c, gameUpdateSchema), current);
+  const statements = [updateStatement(db, "games", id, input)];
+  // Goals and cards of a game that was not played go with its score, in the same transaction.
+  const unplayed = !isPlayed(input.status ?? current.status);
+  if (unplayed) statements.push(db.prepare("DELETE FROM game_events WHERE game_id = ?").bind(id));
+  const results = await db.batch(statements);
+  const eventsRemoved = unplayed ? results[1]!.meta.changes : 0;
+  await audit(c, "update", "game", id, eventsRemoved ? { ...input, eventsRemoved } : input);
+  return c.json(await loadGame(db, id));
 });
 
 gameRoutes.delete("/:id", async (c) => {

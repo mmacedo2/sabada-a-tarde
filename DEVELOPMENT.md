@@ -42,7 +42,29 @@ bun run dev        # http://localhost:8080 (add `-- --port 3000` if 8080 is take
 Without Docker, run the API directly: `cd api && npm ci && cp .dev.vars.example .dev.vars &&
 npm run db:migrate:local && npm run db:seed:local && npm run dev`.
 
-To reset the local database, run `docker compose down -v`.
+To reset the local database, run `docker compose down -v`. After changing code in `api/`, rebuild
+the container with `docker compose up -d --build` (the code is copied into the image).
+
+### Querying the database
+
+Locally, D1 is a SQLite file that wrangler keeps inside the container
+(`/app/.wrangler/state/v3/d1/miniflare-D1DatabaseObject/<hash>.sqlite`, in the `api-state` volume).
+
+```bash
+docker compose exec api npm run db:query:local -- "SELECT id, date, status, home_goals, away_goals FROM games LIMIT 10"
+```
+
+To browse it with a GUI (TablePlus, DB Browser for SQLite), copy a snapshot out and open the copy.
+Don't write to the live file while the API is running.
+
+```bash
+docker compose exec api sh -c 'ls .wrangler/state/v3/d1/miniflare-D1DatabaseObject/'
+docker compose cp api:/app/.wrangler/state/v3/d1/miniflare-D1DatabaseObject/<hash>.sqlite ./local-db.sqlite
+```
+
+In production: `cd api && npm run db:query:remote -- "SELECT COUNT(*) FROM games"`, or the console in
+the Cloudflare dashboard (Storage & Databases → D1 → sabado-a-tarde → Console). Prefer `SELECT`s
+there; change data through the admin so the audit log records it.
 
 ### Tests and checks
 

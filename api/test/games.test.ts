@@ -74,6 +74,93 @@ describe("games", () => {
     expect(table.find((r) => r.club === `fora-${ref.tag}`)).toMatchObject({ points: 0, played: 1 });
   });
 
+  it("undoes a result entered by mistake: back to scheduled, no score, no events, out of the table", async () => {
+    const ref = await seedReference();
+    const admin = await adminClient();
+    const game = (await (
+      await admin.request("/api/admin/games", {
+        method: "POST",
+        json: {
+          competitionId: ref.league,
+          round: "R1",
+          homeClubId: ref.home,
+          awayClubId: ref.away,
+          date: "2026-10-17",
+        },
+      })
+    ).json()) as Game;
+    await admin.request(`/api/admin/games/${game.id}`, {
+      method: "PATCH",
+      json: { status: "live" },
+    });
+    await admin.request(`/api/admin/games/${game.id}/events`, {
+      method: "POST",
+      json: { type: "goal", clubId: ref.home, minute: 5 },
+    });
+    await admin.request(`/api/admin/games/${game.id}`, {
+      method: "PATCH",
+      json: { status: "finished", homePenalties: 4, awayPenalties: 3 },
+    });
+
+    // The form sends the old score along with the new status; the score must still go.
+    const reverted = await admin.request(`/api/admin/games/${game.id}`, {
+      method: "PATCH",
+      json: { status: "scheduled", homeGoals: 1, awayGoals: 0 },
+    });
+    expect(reverted.status).toBe(200);
+    expect(await reverted.json()).toMatchObject({
+      status: "scheduled",
+      homeGoals: null,
+      awayGoals: null,
+      homePenalties: null,
+      awayPenalties: null,
+    });
+    const detail = (await (await admin.request(`/api/admin/games/${game.id}`)).json()) as Game;
+    expect(detail.events).toEqual([]);
+
+    const table = (await (
+      await new Client().request(`/api/standings/${ref.leagueSlug}`)
+    ).json()) as {
+      played: number;
+      points: number;
+    }[];
+    expect(table.every((r) => r.played === 0 && r.points === 0)).toBe(true);
+
+    // And it can be played again from scratch.
+    const restarted = (await (
+      await admin.request(`/api/admin/games/${game.id}`, {
+        method: "PATCH",
+        json: { status: "live" },
+      })
+    ).json()) as Game;
+    expect(restarted).toMatchObject({ status: "live", homeGoals: 0, awayGoals: 0 });
+  });
+
+  it("keeps the score when only other details of a played game change", async () => {
+    const ref = await seedReference();
+    const admin = await adminClient();
+    const game = (await (
+      await admin.request("/api/admin/games", {
+        method: "POST",
+        json: {
+          competitionId: ref.league,
+          round: "R1",
+          homeClubId: ref.home,
+          awayClubId: ref.away,
+          date: "2026-10-17",
+          status: "finished",
+          homeGoals: 2,
+          awayGoals: 1,
+        },
+      })
+    ).json()) as Game;
+    const edited = await admin.request(`/api/admin/games/${game.id}`, {
+      method: "PATCH",
+      json: { venue: "Campo de Pinheiro" },
+    });
+    expect(await edited.json()).toMatchObject({ status: "finished", homeGoals: 2, awayGoals: 1 });
+  });
+
   it("refuses events before kickoff and for clubs outside the game", async () => {
     const ref = await seedReference();
     const admin = await adminClient();

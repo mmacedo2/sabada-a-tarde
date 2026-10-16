@@ -9,6 +9,8 @@
     "db:migrate:remote": "wrangler d1 migrations apply DB -c wrangler.jsonc --remote",
     "db:seed:local": "wrangler d1 execute DB -c wrangler.jsonc --local --file seed/initial-data.sql",
     "db:seed:remote": "wrangler d1 execute DB -c wrangler.jsonc --remote --file seed/initial-data.sql",
+    "db:query:local": "wrangler d1 execute DB -c wrangler.jsonc --local --command",
+    "db:query:remote": "wrangler d1 execute DB -c wrangler.jsonc --remote --command",
     "admin:create": "node scripts/create-admin.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
