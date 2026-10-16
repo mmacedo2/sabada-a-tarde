@@ -1,0 +1,2 @@
+# Copy to .dev.vars for `wrangler dev`. Plain-http localhost cannot keep a Secure cookie in every browser.
+COOKIE_SECURE=false

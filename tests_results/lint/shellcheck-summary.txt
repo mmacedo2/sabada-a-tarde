@@ -1,0 +1,27 @@
+ShellCheck Report Summary
+=========================
+Generated: Thu Oct 30 11:13:58 WET 2025
+Severity Level: style
+Files Checked: 1
+
+Files:
+  - devops/gitlab/test-rules/lint-rules/bash/shellcheck-multi-report.sh
+
+Issue Summary:
+  Total Issues: 0
+0
+  Errors:       0
+0
+  Warnings:     0
+0
+  Info:         0
+0
+  Style:        0
+0
+
+Reports Generated:
+  - GitLab:     tests_results/lint/gl-code-quality-report.json
+  - JSON:       tests_results/lint/report.json
+  - Checkstyle: tests_results/lint/shellcheck-report.xml
+  - Text:       tests_results/lint/shellcheck-report.txt
+  - Summary:    tests_results/lint/shellcheck-summary.txt
