@@ -68,45 +68,56 @@ function Home() {
     .sort(byDateAsc)
     .slice(0, 6);
   const comunicados = documents.slice(0, 6);
+  const spotlight = live[0] ?? upcoming[0] ?? results[0];
+  const spotlightLabel = live[0] ? "Ao vivo" : upcoming[0] ? "Próximo jogo" : "Último resultado";
 
   return (
     <>
-      {/* HERO */}
+      {/* HERO: short intro next to the game that matters right now */}
       <section className="relative isolate overflow-hidden bg-ink text-ink-foreground">
         <img
           src={heroImg}
           alt="Jogo de futebol popular em Guimarães ao final da tarde"
           width={1920}
           height={1088}
-          className="absolute inset-0 size-full object-cover opacity-45"
+          className="absolute inset-0 size-full object-cover opacity-35"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/30" />
-        <div className="container-afpg relative flex min-h-[72vh] flex-col justify-end py-16 md:min-h-[80vh] md:py-24">
-          <p className="eyebrow animate-fade-up text-primary">
-            Futebol Popular de Guimarães{season && ` · Época ${season.name}`}
-          </p>
-          <h1 className="mt-4 max-w-4xl animate-fade-up font-display text-4xl font-extrabold uppercase leading-[0.92] sm:text-6xl lg:text-7xl">
-            Sábado
-            <br />à Tarde
-          </h1>
-          <p className="mt-6 max-w-xl animate-fade-up text-lg text-ink-muted">
-            Futebol Popular de Guimarães — a plataforma independente feita por e para os adeptos.
-            Jogos, resultados, classificações e as histórias de cada freguesia.
-          </p>
-          <div className="mt-9 flex animate-fade-up flex-wrap gap-3">
-            <Link
-              to="/classificacoes"
-              className="eyebrow inline-flex min-h-12 items-center rounded-md bg-primary px-6 text-primary-foreground transition-colors hover:bg-primary-deep"
-            >
-              Ver classificações
-            </Link>
-            <Link
-              to="/resultados"
-              className="eyebrow inline-flex min-h-12 items-center rounded-md border border-white/25 px-6 text-ink-foreground transition-colors hover:bg-white/10"
-            >
-              Ver resultados
-            </Link>
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/85 to-ink/40 lg:bg-gradient-to-r" />
+        <div className="container-afpg relative grid items-center gap-10 py-12 md:py-16 lg:grid-cols-[1.1fr_1fr] lg:py-20">
+          <div className="animate-fade-up">
+            <p className="eyebrow text-primary">
+              Futebol Popular de Guimarães{season && ` · Época ${season.name}`}
+            </p>
+            <h1 className="mt-3 font-display text-3xl font-extrabold uppercase leading-none sm:text-4xl lg:text-5xl">
+              Sábado à Tarde
+            </h1>
+            <p className="mt-4 max-w-md text-base text-ink-muted">
+              Jogos, resultados e classificações do futebol popular de Guimarães, feito por e para
+              os adeptos.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                to="/classificacoes"
+                className="eyebrow inline-flex min-h-11 items-center rounded-md bg-primary px-5 text-primary-foreground transition-colors hover:bg-primary-deep"
+              >
+                Ver classificações
+              </Link>
+              <Link
+                to="/resultados"
+                className="eyebrow inline-flex min-h-11 items-center rounded-md border border-white/25 px-5 text-ink-foreground transition-colors hover:bg-white/10"
+              >
+                Ver resultados
+              </Link>
+            </div>
           </div>
+          {spotlight && (
+            <div className="animate-fade-up">
+              <p className="eyebrow mb-3 text-ink-muted">{spotlightLabel}</p>
+              <div className="text-card-foreground">
+                <MatchCard match={spotlight} />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
