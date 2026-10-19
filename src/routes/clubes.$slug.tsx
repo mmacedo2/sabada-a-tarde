@@ -1,35 +1,61 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 
+import { AdminEditLink } from "@/components/site/AdminEditLink";
 import { Crest } from "@/components/site/Crest";
 import { MatchCard } from "@/components/site/MatchCard";
 import { SectionTitle } from "@/components/site/PageHeader";
 import { StandingsTable } from "@/components/site/StandingsTable";
+import { formatDate } from "@/data/afpg";
+import { useLiveRefresh } from "@/hooks/use-live-refresh";
 import {
-  SEASON,
-  clubBySlug,
-  clubForm,
-  clubStats,
-  formatDate,
-  results,
-  superLigaStandings,
-  upcoming,
-} from "@/data/afpg";
+  api,
+  byDateAsc,
+  byDateDesc,
+  catalogQuery,
+  isLive,
+  isPlayed,
+  leagueLabel,
+  loadMainLeague,
+  type Game,
+  type Player,
+  type PlayerPosition,
+} from "@/lib/api";
+import { useCatalog } from "@/lib/catalog";
+
+const positionLabel: Record<PlayerPosition, string> = {
+  goalkeeper: "Guarda-redes",
+  defender: "Defesa",
+  midfielder: "Médio",
+  forward: "Avançado",
+};
 
 export const Route = createFileRoute("/clubes/$slug")({
-  loader: ({ params }) => {
-    const club = clubBySlug(params.slug);
+  loader: async ({ params, context }) => {
+    const catalog = await context.queryClient.ensureQueryData(catalogQuery);
+    const club = catalog.clubs.find((c) => c.slug === params.slug);
     if (!club) throw notFound();
-    return { club };
+    const slug = encodeURIComponent(club.slug);
+    const [games, { league, standings }, players] = await Promise.all([
+      api.get<Game[]>(`/api/games?club=${slug}`),
+      loadMainLeague(context.queryClient),
+      api.get<Pick<Player, "id" | "name" | "nickname" | "position" | "photoUrl">[]>(
+        `/api/clubs/${slug}/players`,
+      ),
+    ]);
+    return { club, games, league, standings, players };
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Clube não encontrado — Sábado à Tarde" }, { name: "robots", content: "noindex" }],
+        meta: [
+          { title: "Clube não encontrado — Sábado à Tarde" },
+          { name: "robots", content: "noindex" },
+        ],
       };
     }
     const { club } = loaderData;
     const title = `${club.name} — AFPG Guimarães`;
-    const description = `${club.name} (${club.locality}): classificação, resultados, próximo jogo e estatísticas na AFPG, época ${SEASON}.`;
+    const description = `${club.name}${club.locality ? ` (${club.locality})` : ""}: classificação, resultados, próximo jogo e estatísticas na AFPG.`;
     return {
       meta: [
         { title },
@@ -46,11 +72,19 @@ export const Route = createFileRoute("/clubes/$slug")({
 });
 
 function ClubPage() {
-  const { club } = Route.useLoaderData();
-  const stats = clubStats(club.slug);
-  const form = clubForm(club.slug);
-  const clubResults = results.filter((m) => m.home === club.slug || m.away === club.slug);
-  const next = upcoming.find((m) => m.home === club.slug || m.away === club.slug);
+  const { club, games, league, standings, players } = Route.useLoaderData();
+  const { season, clubBySlug } = useCatalog();
+  useLiveRefresh(games.some(isLive));
+  const stats = standings.find((r) => r.club === club.slug);
+  const clubResults = games.filter(isPlayed).sort(byDateDesc);
+  const next =
+    games.find(isLive) ?? games.filter((m) => m.status === "scheduled").sort(byDateAsc)[0];
+  const form = clubResults.slice(0, 5).map((m) => {
+    const isHome = m.home === club.slug;
+    const gf = (isHome ? m.homeGoals : m.awayGoals) ?? 0;
+    const ga = (isHome ? m.awayGoals : m.homeGoals) ?? 0;
+    return gf > ga ? "V" : gf === ga ? "E" : "D";
+  });
 
   const statCards = stats
     ? [
@@ -66,7 +100,7 @@ function ClubPage() {
     : [];
 
   return (
-    <div style={{ ["--club" as string]: club.color }}>
+    <div style={{ ["--club" as string]: club.color ?? "var(--primary)" }}>
       <section className="relative border-b border-ink-border bg-ink text-ink-foreground">
         <div
           className="absolute inset-0 opacity-30"
@@ -78,13 +112,18 @@ function ClubPage() {
         <div className="container-afpg relative flex flex-col gap-8 py-14 md:flex-row md:items-center md:py-20">
           <Crest club={club} size="xl" className="animate-fade-up" />
           <div className="animate-fade-up">
-            <p className="eyebrow text-primary">Super Liga · Época {SEASON}</p>
+            <p className="eyebrow text-primary">
+              {[stats && league?.name, season && `Época ${season.name}`]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
             <h1 className="mt-3 font-display text-4xl font-extrabold uppercase leading-[0.95] md:text-6xl">
               {club.name}
             </h1>
             <p className="mt-4 text-ink-muted">
-              {club.locality} · {club.colorLabel}
+              {[club.locality, club.colorLabel].filter(Boolean).join(" · ")}
             </p>
+            <AdminEditLink label="Editar clube" to="/admin/clubes" className="mt-5" />
             {form.length > 0 && (
               <div className="mt-6 flex items-center gap-2">
                 <span className="eyebrow text-ink-muted">Forma</span>
@@ -142,9 +181,10 @@ function ClubPage() {
             <ul className="grid gap-3">
               {clubResults.map((m) => {
                 const isHome = m.home === club.slug;
-                const opponent = clubBySlug(isHome ? m.away : m.home)!;
-                const gf = isHome ? m.homeGoals! : m.awayGoals!;
-                const ga = isHome ? m.awayGoals! : m.homeGoals!;
+                const opponent = clubBySlug(isHome ? m.away : m.home);
+                if (!opponent) return null;
+                const gf = isHome ? m.homeGoals : m.awayGoals;
+                const ga = isHome ? m.awayGoals : m.homeGoals;
                 return (
                   <li
                     key={m.id}
@@ -154,7 +194,7 @@ function ClubPage() {
                       <Crest club={opponent} size="xs" />
                       <span className="min-w-0">
                         <span className="block truncate text-sm font-semibold">
-                          {isHome ? "vs" : "@"} {opponent.short}
+                          {isHome ? "vs" : "@"} {opponent.shortName}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {m.round} · {formatDate(m.date)}
@@ -178,26 +218,56 @@ function ClubPage() {
         </div>
       </section>
 
-      <section className="container-afpg pb-8">
-        <SectionTitle
-          eyebrow="Super Liga · 1ª Divisão"
-          title="Classificação"
-          action={
-            <Link to="/classificacoes" className="eyebrow text-primary hover:underline">
-              Classificação completa →
-            </Link>
-          }
-        />
-        <StandingsTable rows={superLigaStandings} />
-      </section>
+      {league && (
+        <section className="container-afpg pb-8">
+          <SectionTitle
+            eyebrow={league ? leagueLabel(league) : undefined}
+            title="Classificação"
+            action={
+              <Link to="/classificacoes" className="eyebrow text-primary hover:underline">
+                Classificação completa →
+              </Link>
+            }
+          />
+          <StandingsTable rows={standings} />
+        </section>
+      )}
 
       <section className="container-afpg pb-4">
-        <SectionTitle eyebrow="Sobre o clube" title="Plantel e história" />
-        <p className="max-w-2xl rounded-xl border border-dashed border-border bg-muted/50 p-6 text-sm leading-relaxed text-muted-foreground">
-          A AFPG não publica atualmente plantel ou histórico do {club.short} nos seus documentos
-          oficiais. Esta secção está preparada para receber essa informação assim que for
-          disponibilizada pelo clube ou pela Associação.
-        </p>
+        <SectionTitle eyebrow="Época atual" title="Plantel" />
+        {players.length > 0 ? (
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {players.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-card"
+              >
+                {p.photoUrl ? (
+                  <img
+                    src={p.photoUrl}
+                    alt=""
+                    loading="lazy"
+                    className="size-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="stat flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                    {p.name.slice(0, 1)}
+                  </span>
+                )}
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold">{p.nickname ?? p.name}</span>
+                  <span className="eyebrow text-muted-foreground">
+                    {p.position ? positionLabel[p.position] : "Jogador"}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="max-w-2xl rounded-xl border border-dashed border-border bg-muted/50 p-6 text-sm leading-relaxed text-muted-foreground">
+            O plantel do {club.shortName} ainda não foi publicado.
+          </p>
+        )}
       </section>
     </div>
   );

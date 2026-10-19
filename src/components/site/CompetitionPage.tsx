@@ -5,48 +5,53 @@ import { DocumentList } from "@/components/site/DocumentList";
 import { MatchCard } from "@/components/site/MatchCard";
 import { PageHeader, SectionTitle } from "@/components/site/PageHeader";
 import { StandingsTable } from "@/components/site/StandingsTable";
+import { formatDate } from "@/data/afpg";
 import {
-  SEASON,
-  clubBySlug,
-  clubs,
-  documents,
-  formatDate,
-  matches,
-  superLigaStandings,
-  cupBrackets,
+  byDateAsc,
+  byDateDesc,
+  competitionKindLabel,
+  isPlayed,
   type Competition,
-} from "@/data/afpg";
+  type Doc,
+  type Game,
+  type StandingRow,
+} from "@/lib/api";
+import { useCatalog } from "@/lib/catalog";
 
 const tabs = ["Classificação", "Resultados", "Calendário", "Equipas", "Documentos"] as const;
 type Tab = (typeof tabs)[number];
 
-export function CompetitionPage({ competition }: { competition: Competition }) {
-  const [tab, setTab] = useState<Tab>(
-    competition.slug === "super-liga" ? "Classificação" : "Calendário",
-  );
+export function CompetitionPage({
+  competition,
+  games,
+  standings,
+  documents,
+}: {
+  competition: Competition;
+  games: Game[];
+  standings: StandingRow[] | null;
+  documents: Doc[];
+}) {
+  const { season, clubs, clubBySlug } = useCatalog();
+  const [tab, setTab] = useState<Tab>(standings ? "Classificação" : "Calendário");
 
-  const compMatches = matches.filter((m) => m.competition === competition.slug);
-  const compResults = compMatches.filter((m) => m.homeGoals !== undefined);
-  const compUpcoming = compMatches.filter((m) => m.homeGoals === undefined);
-  const docs = documents.filter((d) =>
-    competition.slug === "super-liga"
-      ? d.category === "Super Liga"
-      : competition.slug === "taca-cidade-berco"
-        ? d.category === "Taça Cidade Berço"
-        : competition.slug === "taca-disciplina"
-          ? d.category === "Taça de Disciplina"
-          : d.category === "Regulamentos",
-  );
+  const results = games.filter((g) => isPlayed(g)).sort(byDateDesc);
+  const upcoming = games.filter((g) => !isPlayed(g)).sort(byDateAsc);
+  const teams = clubs.filter((c) => games.some((g) => g.home === c.slug || g.away === c.slug));
+  const ownDocs = documents.filter((d) => d.category === competition.name);
+  const docs =
+    ownDocs.length > 0 ? ownDocs : documents.filter((d) => d.category === "Regulamentos");
 
-  const hasStandings = competition.slug === "super-liga";
+  // Cups: one card per round, in date order, including ties still to be decided.
+  const rounds = competition.kind === "league" ? [] : groupByRound([...games].sort(byDateAsc));
 
   return (
     <>
       <PageHeader
-        eyebrow={`${competition.kind} · Época ${SEASON}`}
+        eyebrow={`${competitionKindLabel[competition.kind]}${season ? ` · Época ${season.name}` : ""}`}
         title={competition.name}
-        description={competition.description}
-        mark={competition.mark}
+        description={competition.description ?? undefined}
+        mark={competition.logoUrl ?? undefined}
       />
 
       <div className="border-b border-border bg-card/60 backdrop-blur">
@@ -71,22 +76,11 @@ export function CompetitionPage({ competition }: { competition: Competition }) {
 
       <section className="container-afpg py-14 md:py-16">
         {tab === "Classificação" &&
-          (hasStandings ? (
+          (standings ? (
             <>
-              <SectionTitle eyebrow="Classificação final" title="Super Liga 1ª Divisão" />
-              <StandingsTable rows={superLigaStandings} />
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                {[
-                  { label: "Melhor ataque", value: "Atlético Costa · 35 golos" },
-                  { label: "Melhor defesa", value: "Atlético Costa · 11 golos" },
-                  { label: "Campeão", value: "C. Atlético Costa · 32 pts" },
-                ].map((s) => (
-                  <div key={s.label} className="rounded-xl border border-border bg-card p-5 shadow-card">
-                    <p className="eyebrow text-primary">{s.label}</p>
-                    <p className="mt-2 font-display text-lg font-bold">{s.value}</p>
-                  </div>
-                ))}
-              </div>
+              <SectionTitle eyebrow="Classificação" title={competition.name} />
+              <StandingsTable rows={standings} />
+              <LeagueHighlights rows={standings} />
             </>
           ) : (
             <Placeholder text="Esta competição é disputada por eliminatórias — consulte o Calendário e os Resultados." />
@@ -94,15 +88,15 @@ export function CompetitionPage({ competition }: { competition: Competition }) {
 
         {tab === "Resultados" && (
           <>
-            <SectionTitle eyebrow="Boletins oficiais" title="Resultados" />
-            {compResults.length > 0 ? (
+            <SectionTitle eyebrow="Jogos realizados" title="Resultados" />
+            {results.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {compResults.map((m) => (
+                {results.map((m) => (
                   <MatchCard key={m.id} match={m} />
                 ))}
               </div>
             ) : (
-              <Placeholder text="Resultados desta competição publicados apenas em documento oficial — ver o separador Documentos." />
+              <Placeholder text="Ainda não há resultados nesta competição." />
             )}
           </>
         )}
@@ -110,52 +104,55 @@ export function CompetitionPage({ competition }: { competition: Competition }) {
         {tab === "Calendário" && (
           <>
             <SectionTitle eyebrow="Programação" title="Calendário" />
-            {cupBrackets[competition.slug] ? (
+            {rounds.length > 0 ? (
               <div className="grid gap-6">
-                {cupBrackets[competition.slug]!.map((stage) => (
-                  <div key={stage.stage} className="rounded-xl border border-border bg-card p-6 shadow-card">
+                {rounds.map(({ round, date, games: ties }) => (
+                  <div
+                    key={round}
+                    className="rounded-xl border border-border bg-card p-6 shadow-card"
+                  >
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <h3 className="font-display text-lg font-extrabold uppercase">{stage.stage}</h3>
-                      <p className="eyebrow text-muted-foreground">{formatDate(stage.date)}</p>
+                      <h3 className="font-display text-lg font-extrabold uppercase">{round}</h3>
+                      <p className="eyebrow text-muted-foreground">{formatDate(date)}</p>
                     </div>
-                    {stage.ties.length > 0 ? (
-                      <ul className="mt-4 grid gap-2">
-                        {stage.ties.map((tie, i) => {
-                          const home = tie.home ? clubBySlug(tie.home) : null;
-                          const away = tie.away ? clubBySlug(tie.away) : null;
-                          return (
-                            <li
-                              key={i}
-                              className="flex flex-wrap items-center gap-3 rounded-lg bg-muted/60 px-4 py-3 text-sm"
-                            >
-                              {home && <Crest club={home} size="xs" />}
-                              <span className="font-semibold">{home?.short ?? tie.homeLabel}</span>
-                              <span className="eyebrow text-muted-foreground">vs</span>
-                              {away && <Crest club={away} size="xs" />}
-                              <span className="font-semibold">{away?.short ?? tie.awayLabel ?? "—"}</span>
-                              {tie.note && (
-                                <span className="eyebrow ml-auto text-primary">{tie.note}</span>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : (
-                      <p className="mt-4 text-sm text-muted-foreground">
-                        Emparelhamentos disponíveis no calendário oficial em PDF.
-                      </p>
-                    )}
+                    <ul className="mt-4 grid gap-2">
+                      {ties.map((tie) => {
+                        const home = clubBySlug(tie.home);
+                        const away = clubBySlug(tie.away);
+                        return (
+                          <li
+                            key={tie.id}
+                            className="flex flex-wrap items-center gap-3 rounded-lg bg-muted/60 px-4 py-3 text-sm"
+                          >
+                            {home && <Crest club={home} size="xs" />}
+                            <span className="font-semibold">
+                              {home?.shortName ?? tie.homePlaceholder}
+                            </span>
+                            <span className="eyebrow text-muted-foreground">
+                              {isPlayed(tie) ? `${tie.homeGoals} – ${tie.awayGoals}` : "vs"}
+                            </span>
+                            {away && <Crest club={away} size="xs" />}
+                            <span className="font-semibold">
+                              {away?.shortName ?? tie.awayPlaceholder ?? "—"}
+                            </span>
+                            {tie.stage && (
+                              <span className="eyebrow ml-auto text-primary">{tie.stage}</span>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </div>
                 ))}
               </div>
-            ) : compUpcoming.length > 0 ? (
+            ) : upcoming.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {compUpcoming.map((m) => (
+                {upcoming.map((m) => (
                   <MatchCard key={m.id} match={m} />
                 ))}
               </div>
             ) : (
-              <Placeholder text="Calendário publicado em documento oficial — ver o separador Documentos." />
+              <Placeholder text="Sem jogos agendados — consulte o separador Documentos." />
             )}
           </>
         )}
@@ -163,18 +160,22 @@ export function CompetitionPage({ competition }: { competition: Competition }) {
         {tab === "Equipas" && (
           <>
             <SectionTitle eyebrow="Participantes" title="Equipas" />
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {clubs.map((club) => (
-                <div
-                  key={club.slug}
-                  className="flex flex-col items-center rounded-xl border border-border bg-card p-6 text-center shadow-card"
-                >
-                  <Crest club={club} size="lg" />
-                  <p className="mt-4 text-sm font-bold leading-tight">{club.name}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{club.locality}</p>
-                </div>
-              ))}
-            </div>
+            {teams.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {teams.map((club) => (
+                  <div
+                    key={club.slug}
+                    className="flex flex-col items-center rounded-xl border border-border bg-card p-6 text-center shadow-card"
+                  >
+                    <Crest club={club} size="lg" />
+                    <p className="mt-4 text-sm font-bold leading-tight">{club.name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{club.locality}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Placeholder text="Equipas por definir." />
+            )}
           </>
         )}
 
@@ -189,7 +190,43 @@ export function CompetitionPage({ competition }: { competition: Competition }) {
   );
 }
 
-function Placeholder({ text }: { text: string }) {
+function groupByRound(games: Game[]) {
+  const rounds = new Map<string, { round: string; date: string; games: Game[] }>();
+  for (const g of games) {
+    const entry = rounds.get(g.round) ?? { round: g.round, date: g.date, games: [] };
+    entry.games.push(g);
+    rounds.set(g.round, entry);
+  }
+  return [...rounds.values()];
+}
+
+function LeagueHighlights({ rows }: { rows: StandingRow[] }) {
+  const { clubBySlug } = useCatalog();
+  const leader = rows[0];
+  if (!leader || leader.played === 0) return null;
+  const attack = rows.reduce((best, r) => (r.goalsFor > best.goalsFor ? r : best));
+  const defence = rows
+    .filter((r) => r.played > 0)
+    .reduce((best, r) => (r.goalsAgainst < best.goalsAgainst ? r : best));
+  const name = (slug: string) => clubBySlug(slug)?.shortName ?? slug;
+  const cards = [
+    { label: "Líder", value: `${name(leader.club)} · ${leader.points} pts` },
+    { label: "Melhor ataque", value: `${name(attack.club)} · ${attack.goalsFor} golos` },
+    { label: "Melhor defesa", value: `${name(defence.club)} · ${defence.goalsAgainst} sofridos` },
+  ];
+  return (
+    <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      {cards.map((s) => (
+        <div key={s.label} className="rounded-xl border border-border bg-card p-5 shadow-card">
+          <p className="eyebrow text-primary">{s.label}</p>
+          <p className="mt-2 font-display text-lg font-bold">{s.value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function Placeholder({ text }: { text: string }) {
   return (
     <p className="rounded-xl border border-dashed border-border bg-muted/50 p-6 text-sm text-muted-foreground">
       {text}

@@ -44,8 +44,18 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+type ServiceBinding = { fetch(request: Request): Promise<Response> };
+type CloudflareRequest = Request & {
+  runtime?: { cloudflare?: { env?: { API?: ServiceBinding } } };
+};
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    // Same-origin API: the API Worker is only reachable through this service binding.
+    // In `vite dev` the dev-server proxy answers /api before this entry runs.
+    const api = (request as CloudflareRequest).runtime?.cloudflare?.env?.API;
+    if (api && new URL(request.url).pathname.startsWith("/api/")) return api.fetch(request);
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

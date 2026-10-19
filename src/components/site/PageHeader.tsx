@@ -5,10 +5,10 @@ export function PageHeader({
   mark,
   children,
 }: {
-  eyebrow?: string;
+  eyebrow?: string | undefined;
   title: string;
-  description?: string;
-  mark?: string;
+  description?: string | undefined;
+  mark?: string | undefined;
   children?: React.ReactNode;
 }) {
   return (
@@ -21,7 +21,9 @@ export function PageHeader({
               {title}
             </h1>
             {description && (
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-muted">{description}</p>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-muted">
+                {description}
+              </p>
             )}
             {children && <div className="mt-7">{children}</div>}
           </div>
@@ -54,7 +56,9 @@ export function SectionTitle({
     <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <div>
         {eyebrow && <p className="eyebrow text-primary">{eyebrow}</p>}
-        <h2 className="mt-1.5 font-display text-2xl font-extrabold uppercase md:text-3xl">{title}</h2>
+        <h2 className="mt-1.5 font-display text-2xl font-extrabold uppercase md:text-3xl">
+          {title}
+        </h2>
       </div>
       {action}
     </div>

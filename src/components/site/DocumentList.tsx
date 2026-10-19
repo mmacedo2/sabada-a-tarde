@@ -1,4 +1,4 @@
-import type { Doc } from "@/data/afpg";
+import type { Doc } from "@/lib/api";
 
 export function DocumentList({ docs }: { docs: Doc[] }) {
   if (docs.length === 0) {
@@ -12,7 +12,7 @@ export function DocumentList({ docs }: { docs: Doc[] }) {
   return (
     <ul className="grid gap-3">
       {docs.map((doc) => (
-        <li key={doc.url + doc.title}>
+        <li key={doc.id}>
           <a
             href={doc.url}
             target="_blank"
@@ -21,7 +21,14 @@ export function DocumentList({ docs }: { docs: Doc[] }) {
           >
             <span className="flex min-w-0 items-center gap-4">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-primary">
-                <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  aria-hidden="true"
+                >
                   <path d="M14 3v5h5" />
                   <path d="M6 3h8l5 5v13H6z" />
                 </svg>

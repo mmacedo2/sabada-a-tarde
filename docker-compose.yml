@@ -1,0 +1,13 @@
+# Local API + database. The frontend runs on the host: `bun run dev` (proxies /api to :8787).
+services:
+  api:
+    build: ./api
+    ports:
+      - "127.0.0.1:8787:8787"
+    volumes:
+      # Local D1 (SQLite) and R2 files survive container restarts.
+      - api-state:/app/.wrangler
+    restart: unless-stopped
+
+volumes:
+  api-state:

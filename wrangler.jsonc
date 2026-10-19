@@ -1,0 +1,8 @@
+// Merged by nitro into the generated .output/server/wrangler.json at build time.
+{
+  "name": "sabado-a-tarde-web",
+  "compatibility_date": "2026-08-20",
+  "observability": { "enabled": true },
+  // /api/* is forwarded to the API Worker (see src/server.ts).
+  "services": [{ "binding": "API", "service": "sabado-a-tarde-api" }]
+}

@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { CATALOG_STALE_MS, catalogQuery } from "@/lib/api";
 
 function NotFoundComponent() {
   return (
@@ -76,6 +77,8 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: ({ context }) => context.queryClient.ensureQueryData(catalogQuery),
+  staleTime: CATALOG_STALE_MS,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -116,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "WebSite",
           name: "Sábado à Tarde",
           alternateName: "Futebol Popular de Guimarães",
-          
+
           areaServed: "Guimarães, Portugal",
         }),
       },
