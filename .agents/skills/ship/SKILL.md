@@ -49,7 +49,7 @@ The body has three short sections:
 gh pr checks <number> --watch
 ```
 
-The `web` and `api` checks are required. Fix a failure with a new commit; never force-push.
+The `test-web` and `test-api` checks are required. Fix a failure with a new commit; never force-push.
 
 ## 5. Merge, only when asked
 
@@ -60,20 +60,25 @@ gh pr merge <number> --merge --admin
 The maintainer can't approve their own PR, so merging uses the admin bypass, and only once
 they've said to merge. The branch is deleted automatically.
 
-## 6. Deploy, only when asked
+## 6. Deploy, with the maintainer's approval
 
-Merging does not deploy. A production deploy is the maintainer's to run, because it asks for
-confirmation in their own terminal. When they want to deploy, tell them to run, from an
-up-to-date `main` (in Claude Code: `! make deploy`):
+Merging to `main` starts the Deploy workflow. Its `approve` job waits for the maintainer, in
+the run's page on GitHub (**Review deployments** → **production-approval** → **Approve and
+deploy**). Give them the link:
 
 ```bash
-make deploy
+gh run list --workflow Deploy --branch main --limit 1 --json url --jq '.[0].url'
 ```
 
-It runs the checks, then applies migrations, deploys the API and deploys the site, in that
-order. It refuses to run from another branch, with uncommitted changes, or when `main` differs
-from `origin/main`. Never run it yourself with `CONFIRM=yes`. Single steps exist too: `make
-migration`, `make build_and_deploy_backend`, `make build_and_deploy_frontend`.
+Once approved, `deploy-api` applies migrations and deploys the API, then `deploy-web` deploys the
+site. If `main` moved on while it waited, the jobs stop and the newer run deploys instead. The
+tests don't run again: they passed on the PR. Follow it with `gh run watch <run-id>`.
+
+The maintainer can also deploy from their machine with `make deploy` (in Claude Code:
+`! make deploy`). It refuses to run from another branch, with uncommitted changes, or when `main`
+differs from `origin/main`, and asks for confirmation in their terminal. Never run it yourself
+with `CONFIRM=yes`. Single steps exist too: `make migration`, `make build_and_deploy_backend`,
+`make build_and_deploy_frontend`.
 
 Then check that `/api/health` on the live site returns `{"ok":true}` and that the changed pages
 work. To undo a deploy: `npx wrangler rollback <version-id> --name sabado-a-tarde-web` (or

@@ -21,7 +21,10 @@ Every feature, fix and migration goes through these steps, in this order:
 4. **Wait for the maintainer.** They test in the browser and say when they're satisfied. No
    commit, push or PR before that.
 5. **Open the PR** with the `ship` skill: push, PR to `main`, CI green. Merge only when asked.
-6. **Deploy only when asked**, with `make deploy`: checks, then migrations, the API and the site.
+6. **Deploy only with the maintainer's approval.** Merging to `main` starts the Deploy workflow:
+   its `approve` job waits until the maintainer approves it in GitHub, then `deploy-api`
+   (migrations and the API) and `deploy-web` (the site) run. The maintainer can also run
+   `make deploy` themselves.
 
 ## Checks
 
