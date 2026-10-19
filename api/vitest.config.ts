@@ -9,6 +9,11 @@ export default defineConfig({
         bindings: {
           TEST_MIGRATIONS: await readD1Migrations("./migrations"),
           COOKIE_SECURE: "false",
+          // A fake provider; test/oidc.test.ts answers its HTTP calls.
+          OIDC_ISSUER: "https://idp.test",
+          OIDC_CLIENT_ID: "client-1",
+          OIDC_CLIENT_SECRET: "secret-1",
+          OIDC_PROVIDER_NAME: "Google",
         },
       },
     })),

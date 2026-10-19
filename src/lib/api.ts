@@ -239,6 +239,12 @@ export const catalogQuery = queryOptions({
   staleTime: CATALOG_STALE_MS,
 });
 
+export const authProvidersQuery = queryOptions({
+  queryKey: ["auth-providers"],
+  queryFn: () => api.get<{ oidc: { name: string } | null }>("/api/auth/providers"),
+  staleTime: Infinity,
+});
+
 export const sessionQuery = queryOptions({
   queryKey: ["session"],
   queryFn: () => api.get<SessionUser | null>("/api/auth/me"),

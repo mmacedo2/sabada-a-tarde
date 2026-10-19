@@ -4,10 +4,12 @@ import type { AppEnv } from "../env";
 import { NOW_SQL } from "../lib/db";
 import { HttpError } from "../lib/http";
 import { requireUser } from "../lib/middleware";
+import { oidcConfig } from "../lib/oidc";
 import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from "../lib/password";
 import { endSession, revokeUserSessions, startSession } from "../lib/session";
 import { body } from "../lib/validate";
 import { changePasswordSchema, loginSchema } from "../schemas";
+import { oidcRoutes } from "./oidc";
 
 export const authRoutes = new Hono<AppEnv>();
 
@@ -82,6 +84,14 @@ authRoutes.post("/logout", async (c) => {
 });
 
 authRoutes.get("/me", (c) => c.json(c.get("user")));
+
+/** What the login page offers besides email and password. */
+authRoutes.get("/providers", (c) => {
+  const config = oidcConfig(c.env);
+  return c.json({ oidc: config ? { name: config.name } : null });
+});
+
+authRoutes.route("/oidc", oidcRoutes);
 
 authRoutes.post("/password", requireUser, async (c) => {
   const { currentPassword, newPassword } = await body(c, changePasswordSchema);

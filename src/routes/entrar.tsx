@@ -1,19 +1,31 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 import { Field, errorMessage, inputClass } from "@/components/admin/form";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Button } from "@/components/ui/button";
-import { api, sessionQuery, type SessionUser } from "@/lib/api";
+import { api, authProvidersQuery, sessionQuery, type SessionUser } from "@/lib/api";
 
 /** Only internal admin paths, so the redirect cannot send people to another site. */
 const safeRedirect = (value: unknown) =>
   typeof value === "string" && /^\/admin(\/[\w\-/]*)?$/.test(value) ? value : "/admin";
 
+/** Codes the API's /api/auth/oidc/callback sends back in `?erro=`. */
+const providerErrors: Record<string, string> = {
+  cancelado: "O início de sessão foi cancelado.",
+  sessao: "O pedido expirou. Tente novamente.",
+  email: "A sua conta não tem um email verificado. Verifique-o no fornecedor e tente novamente.",
+  inativo: "Esta conta está desativada.",
+  oidc: "Não foi possível iniciar sessão. Tente novamente dentro de momentos.",
+};
+
 export const Route = createFileRoute("/entrar")({
-  validateSearch: (search: Record<string, unknown>): { redirect?: string | undefined } => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { redirect?: string | undefined; erro?: string | undefined } => ({
     redirect: typeof search["redirect"] === "string" ? search["redirect"] : undefined,
+    erro: typeof search["erro"] === "string" ? search["erro"] : undefined,
   }),
   head: () => ({
     meta: [{ title: "Entrar — Sábado à Tarde" }, { name: "robots", content: "noindex" }],
@@ -22,12 +34,16 @@ export const Route = createFileRoute("/entrar")({
 });
 
 function LoginPage() {
-  const redirect = safeRedirect(Route.useSearch().redirect);
+  const search = Route.useSearch();
+  const redirect = safeRedirect(search.redirect);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const provider = useQuery(authProvidersQuery).data?.oidc ?? null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    search.erro ? (providerErrors[search.erro] ?? providerErrors["oidc"]!) : null,
+  );
   const [pending, setPending] = useState(false);
 
   async function submit(event: FormEvent) {
@@ -50,13 +66,30 @@ function LoginPage() {
       <PageHeader
         eyebrow="Área reservada"
         title="Entrar"
-        description="Acesso para a equipa editorial."
+        description={
+          provider
+            ? `Entre com a sua conta ${provider.name}. Se ainda não tem conta no site, é criada na primeira vez.`
+            : "Acesso para a equipa editorial."
+        }
       />
       <section className="container-afpg py-14">
         <form
           onSubmit={submit}
           className="mx-auto grid max-w-sm gap-5 rounded-xl border border-border bg-card p-6 shadow-card"
         >
+          {provider && (
+            <>
+              {/* A full navigation: the API redirects to the provider and back. */}
+              <Button asChild variant="outline">
+                <a href={`/api/auth/oidc/start?redirect=${encodeURIComponent(redirect)}`}>
+                  Entrar com {provider.name}
+                </a>
+              </Button>
+              <p className="eyebrow flex items-center gap-3 text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
+                ou com email
+              </p>
+            </>
+          )}
           <Field label="Email">
             {(id) => (
               <input

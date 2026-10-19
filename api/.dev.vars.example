@@ -1,2 +1,8 @@
 # Copy to .dev.vars for `wrangler dev`. Plain-http localhost cannot keep a Secure cookie in every browser.
 COOKIE_SECURE=false
+
+# Optional "Entrar com Google" (RUNBOOK.md 1.9). Leave out to keep email and password only.
+# OIDC_ISSUER=https://accounts.google.com
+# OIDC_CLIENT_ID=
+# OIDC_CLIENT_SECRET=
+# OIDC_PROVIDER_NAME=Google

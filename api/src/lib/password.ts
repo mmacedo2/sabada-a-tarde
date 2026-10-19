@@ -38,11 +38,15 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const [algorithm, iterations, salt, hash] = stored.split("$");
-  if (algorithm !== ALGORITHM || !iterations || !salt || !hash) return false;
-  const expected = fromBase64(hash);
-  const actual = await derive(password, fromBase64(salt), Number(iterations));
-  return constantTimeEqual(actual, expected);
+  const usable = algorithm === ALGORITHM && Boolean(iterations && salt && hash);
+  // An account without a password still costs one derivation, so timing does not reveal it.
+  const [, i, s, h] = (usable ? stored : DUMMY_PASSWORD_HASH).split("$");
+  const actual = await derive(password, fromBase64(s!), Number(i));
+  return constantTimeEqual(actual, fromBase64(h!)) && usable;
 }
+
+/** Stored for users who only sign in through an OIDC provider: matches no password. */
+export const NO_PASSWORD = "!";
 
 /** Verified against when the email is unknown, so response time does not reveal which emails exist. */
 export const DUMMY_PASSWORD_HASH =
