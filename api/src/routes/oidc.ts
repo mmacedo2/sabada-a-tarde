@@ -8,12 +8,12 @@ import { NOW_SQL } from "../lib/db";
 import { HttpError } from "../lib/http";
 import { authorizationUrl, fetchIdentity, oidcConfig, type OidcIdentity } from "../lib/oidc";
 import { NO_PASSWORD } from "../lib/password";
-import { randomToken, startSession } from "../lib/session";
+import { randomToken, revokeUserSessions, startSession } from "../lib/session";
 
 /**
  * "Entrar com <provider>": signs in, links an existing account by verified email,
- * or registers a new one with the `user` role. Admin rights are only ever granted
- * by an admin in /admin/utilizadores.
+ * or registers a new one with the `user` role. Manager and admin rights are only
+ * ever granted by an admin in /admin/utilizadores.
  */
 export const oidcRoutes = new Hono<AppEnv>();
 
@@ -38,6 +38,13 @@ const savedStateSchema = z.object({
 /** Same rule as the login page: only internal admin paths, so it cannot leave the site. */
 const safeRedirect = (value: unknown) =>
   typeof value === "string" && /^\/admin(\/[\w\-/]*)?$/.test(value) ? value : "/admin";
+
+/** Where a role lands after signing in; managers only have the games screens. */
+function landing(role: string, redirect: string): string {
+  if (role === "admin") return redirect;
+  if (role === "manager") return /^\/admin\/jogos(\/|$)/.test(redirect) ? redirect : "/admin/jogos";
+  return "/";
+}
 
 const callbackUrl = (c: Context<AppEnv>) => `${new URL(c.req.url).origin}/api/auth/oidc/callback`;
 
@@ -94,11 +101,26 @@ async function findOrCreateUser(
     )
     .bind(identity.issuer, identity.subject, identity.email);
   const existing = await db
-    .prepare("SELECT id, role, active FROM users WHERE email = ?")
+    .prepare("SELECT id, role, active, email_verified FROM users WHERE email = ?")
     .bind(identity.email)
-    .first<AccountRow>();
-  if (existing) {
+    .first<AccountRow & { email_verified: number }>();
+  if (existing?.email_verified === 1) {
     await link.run();
+    return existing;
+  }
+  if (existing) {
+    // Self-registered, so nobody had proven the email; the provider just did. Whoever
+    // registered may not be the owner, so their password and sessions stop working.
+    await db.batch([
+      link,
+      db
+        .prepare(
+          `UPDATE users SET email_verified = 1, password_hash = ?, updated_at = ${NOW_SQL} WHERE id = ?`,
+        )
+        .bind(NO_PASSWORD, existing.id),
+      revokeUserSessions(db, existing.id),
+    ]);
+    await audit(c, "update", "user", existing.id, { claimedVia: "oidc", passwordCleared: true });
     return existing;
   }
 
@@ -156,5 +178,5 @@ oidcRoutes.get("/callback", async (c) => {
     .bind(user.id)
     .run();
   await startSession(c, user.id);
-  return c.redirect(user.role === "admin" ? saved.redirect : "/", 302);
+  return c.redirect(landing(user.role, saved.redirect), 302);
 });

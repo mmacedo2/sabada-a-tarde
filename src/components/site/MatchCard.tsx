@@ -61,7 +61,12 @@ export function MatchCard({ match }: { match: Game }) {
         </p>
       )}
       <div className="mt-4 flex justify-center empty:hidden">
-        <AdminEditLink label="Gerir jogo" to="/admin/jogos/$id" params={{ id: String(match.id) }} />
+        <AdminEditLink
+          label="Gerir jogo"
+          forManagers
+          to="/admin/jogos/$id"
+          params={{ id: String(match.id) }}
+        />
       </div>
     </article>
   );

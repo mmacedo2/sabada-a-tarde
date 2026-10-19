@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 
+import type { Role } from "../src/env";
 import app from "../src/index";
 import { hashPassword } from "../src/lib/password";
 
@@ -7,7 +8,7 @@ export const ORIGIN = "http://localhost";
 
 export async function createUser(
   email: string,
-  role: "admin" | "user" = "admin",
+  role: Role = "admin",
   password = "correct-horse-battery",
 ): Promise<number> {
   const row = await env.DB.prepare(
@@ -53,8 +54,11 @@ export class Client {
   }
 }
 
-export async function adminClient(email = `admin-${crypto.randomUUID()}@test.pt`) {
-  await createUser(email, "admin");
+export async function adminClient(
+  email = `admin-${crypto.randomUUID()}@test.pt`,
+  role: Role = "admin",
+) {
+  await createUser(email, role);
   const client = new Client();
   const res = await client.login(email);
   if (res.status !== 200) throw new Error(`login failed: ${res.status}`);

@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 
 import type { AppEnv } from "../env";
+import { audit } from "../lib/audit";
 import { NOW_SQL } from "../lib/db";
 import { HttpError } from "../lib/http";
 import { requireUser } from "../lib/middleware";
@@ -8,7 +9,7 @@ import { oidcConfig } from "../lib/oidc";
 import { DUMMY_PASSWORD_HASH, hashPassword, verifyPassword } from "../lib/password";
 import { endSession, revokeUserSessions, startSession } from "../lib/session";
 import { body } from "../lib/validate";
-import { changePasswordSchema, loginSchema } from "../schemas";
+import { changePasswordSchema, loginSchema, registerSchema } from "../schemas";
 import { oidcRoutes } from "./oidc";
 
 export const authRoutes = new Hono<AppEnv>();
@@ -16,6 +17,8 @@ export const authRoutes = new Hono<AppEnv>();
 const THROTTLE_WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES_PER_EMAIL = 5;
 const MAX_FAILURES_PER_IP = 30;
+const SIGNUP_WINDOW_MS = 60 * 60 * 1000;
+const MAX_SIGNUPS_PER_IP = 5;
 
 authRoutes.use(async (c, next) => {
   await next();
@@ -76,6 +79,46 @@ authRoutes.post("/login", async (c) => {
   ]);
   await startSession(c, user.id);
   return c.json({ id: user.id, email: user.email, name: user.name, role: user.role });
+});
+
+/**
+ * Creates a `user` account and signs it in. Nobody checks the email, so the account is
+ * marked unverified: an OIDC sign-in with the same verified email takes it over.
+ */
+authRoutes.post("/register", async (c) => {
+  const { email, name, password } = await body(c, registerSchema);
+  const ip = c.req.header("cf-connecting-ip") ?? null;
+  const db = c.env.DB;
+  const since = new Date(Date.now() - SIGNUP_WINDOW_MS).toISOString();
+
+  const attempts = await db
+    .prepare("SELECT COUNT(*) AS n FROM signup_attempts WHERE ip = ? AND attempted_at > ?")
+    .bind(ip, since)
+    .first<{ n: number }>();
+  if ((attempts?.n ?? 0) >= MAX_SIGNUPS_PER_IP) {
+    throw new HttpError(429, "Demasiados registos a partir desta rede. Tente mais tarde.");
+  }
+  await db.batch([
+    db.prepare("INSERT INTO signup_attempts (ip) VALUES (?)").bind(ip),
+    db
+      .prepare("DELETE FROM signup_attempts WHERE attempted_at < ?")
+      .bind(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+  ]);
+
+  const taken = await db.prepare("SELECT 1 FROM users WHERE email = ?").bind(email).first();
+  if (taken) {
+    throw new HttpError(409, "Já existe uma conta com este email. Inicie sessão.");
+  }
+  const user = await db
+    .prepare(
+      `INSERT INTO users (email, name, password_hash, role, email_verified)
+       VALUES (?, ?, ?, 'user', 0) RETURNING id, email, name, role`,
+    )
+    .bind(email, name, await hashPassword(password))
+    .first<{ id: number; email: string; name: string; role: string }>();
+  await audit(c, "create", "user", user!.id, { email, name, via: "register" });
+  await startSession(c, user!.id);
+  return c.json(user, 201);
 });
 
 authRoutes.post("/logout", async (c) => {

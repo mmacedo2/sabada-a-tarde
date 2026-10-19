@@ -21,7 +21,7 @@ const nav = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const { competitions } = useCatalog();
-  const { user, isAdmin } = useSession();
+  const { user, isAdmin, canEditGames } = useSession();
   const logout = useLogout();
 
   return (
@@ -136,13 +136,13 @@ export function Header() {
             {user && (
               <>
                 <p className="eyebrow px-3 pt-4 text-primary">{user.name}</p>
-                {isAdmin && (
+                {canEditGames && (
                   <Link
-                    to="/admin"
+                    to={isAdmin ? "/admin" : "/admin/jogos"}
                     onClick={() => setOpen(false)}
                     className="rounded-md px-3 py-3 text-base text-ink-muted transition-colors hover:bg-white/5 hover:text-ink-foreground"
                   >
-                    Administração
+                    {isAdmin ? "Administração" : "Gerir jogos"}
                   </Link>
                 )}
                 <button

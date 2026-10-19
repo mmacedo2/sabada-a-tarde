@@ -33,27 +33,40 @@ export const Route = createFileRoute("/entrar")({
   component: LoginPage,
 });
 
+/** Where a role lands after signing in; matches the API's OIDC callback. */
+function landing(user: SessionUser, redirect: string) {
+  if (user.role === "admin") return redirect;
+  if (user.role === "manager")
+    return /^\/admin\/jogos(\/|$)/.test(redirect) ? redirect : "/admin/jogos";
+  return "/";
+}
+
 function LoginPage() {
   const search = Route.useSearch();
   const redirect = safeRedirect(search.redirect);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const provider = useQuery(authProvidersQuery).data?.oidc ?? null;
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(
     search.erro ? (providerErrors[search.erro] ?? providerErrors["oidc"]!) : null,
   );
   const [pending, setPending] = useState(false);
+  const registering = mode === "register";
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setPending(true);
     setError(null);
     try {
-      const user = await api.post<SessionUser>("/api/auth/login", { email, password });
+      const user = registering
+        ? await api.post<SessionUser>("/api/auth/register", { name, email, password })
+        : await api.post<SessionUser>("/api/auth/login", { email, password });
       queryClient.setQueryData(sessionQuery.queryKey, user);
-      await navigate({ href: user.role === "admin" ? redirect : "/" });
+      await navigate({ href: landing(user, redirect) });
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -61,15 +74,20 @@ function LoginPage() {
     }
   }
 
+  function switchMode(next: "login" | "register") {
+    setMode(next);
+    setError(null);
+  }
+
   return (
     <>
       <PageHeader
-        eyebrow="Área reservada"
-        title="Entrar"
+        eyebrow="A sua conta"
+        title={registering ? "Criar conta" : "Entrar"}
         description={
           provider
-            ? `Entre com a sua conta ${provider.name}. Se ainda não tem conta no site, é criada na primeira vez.`
-            : "Acesso para a equipa editorial."
+            ? `Entre com a sua conta ${provider.name} ou com email. Com ${provider.name}, a conta é criada na primeira vez.`
+            : "Entre com o seu email, ou crie uma conta."
         }
       />
       <section className="container-afpg py-14">
@@ -77,12 +95,26 @@ function LoginPage() {
           onSubmit={submit}
           className="mx-auto grid max-w-sm gap-5 rounded-xl border border-border bg-card p-6 shadow-card"
         >
+          <div role="tablist" className="grid grid-cols-2 gap-1 rounded-md bg-muted p-1">
+            {(["login", "register"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={mode === m}
+                onClick={() => switchMode(m)}
+                className={`rounded px-3 py-1.5 text-sm transition-colors ${mode === m ? "bg-card font-semibold shadow-card" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {m === "login" ? "Entrar" : "Criar conta"}
+              </button>
+            ))}
+          </div>
           {provider && (
             <>
               {/* A full navigation: the API redirects to the provider and back. */}
               <Button asChild variant="outline">
                 <a href={`/api/auth/oidc/start?redirect=${encodeURIComponent(redirect)}`}>
-                  Entrar com {provider.name}
+                  Continuar com {provider.name}
                 </a>
               </Button>
               <p className="eyebrow flex items-center gap-3 text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
@@ -90,12 +122,27 @@ function LoginPage() {
               </p>
             </>
           )}
+          {registering && (
+            <Field label="Nome">
+              {(id) => (
+                <input
+                  id={id}
+                  autoComplete="name"
+                  required
+                  maxLength={120}
+                  className={inputClass}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              )}
+            </Field>
+          )}
           <Field label="Email">
             {(id) => (
               <input
                 id={id}
                 type="email"
-                autoComplete="username"
+                autoComplete={registering ? "email" : "username"}
                 required
                 className={inputClass}
                 value={email}
@@ -103,13 +150,14 @@ function LoginPage() {
               />
             )}
           </Field>
-          <Field label="Palavra-passe">
+          <Field label="Palavra-passe" {...(registering ? { hint: "Mínimo 10 caracteres." } : {})}>
             {(id) => (
               <input
                 id={id}
                 type="password"
-                autoComplete="current-password"
+                autoComplete={registering ? "new-password" : "current-password"}
                 required
+                minLength={registering ? 10 : undefined}
                 className={inputClass}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -122,7 +170,13 @@ function LoginPage() {
             </p>
           )}
           <Button type="submit" disabled={pending}>
-            {pending ? "A entrar…" : "Entrar"}
+            {registering
+              ? pending
+                ? "A criar conta…"
+                : "Criar conta"
+              : pending
+                ? "A entrar…"
+                : "Entrar"}
           </Button>
         </form>
       </section>

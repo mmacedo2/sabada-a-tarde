@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLogout, useSession } from "@/hooks/use-session";
 
-/** "Entrar" when signed out; otherwise a menu with the admin area and logout. */
+/** "Entrar" when signed out; otherwise a menu with what the role can open, and logout. */
 export function AccountMenu() {
-  const { user, isAdmin, isPending } = useSession();
+  const { user, isAdmin, canEditGames, isPending } = useSession();
   const logout = useLogout();
 
   // Nothing until the browser knows, so the button never flips from "Entrar" to the user.
@@ -56,11 +56,14 @@ export function AccountMenu() {
             <Link to="/admin">Administração</Link>
           </DropdownMenuItem>
         )}
-        {isAdmin && (
+        {canEditGames && !isAdmin && (
           <DropdownMenuItem asChild>
-            <Link to="/admin/conta">A minha conta</Link>
+            <Link to="/admin/jogos">Gerir jogos</Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <Link to="/admin/conta">A minha conta</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => void logout()}>Terminar sessão</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

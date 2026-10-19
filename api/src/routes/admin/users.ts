@@ -37,7 +37,10 @@ userRoutes.patch("/:id", async (c) => {
   const id = parseId(c.req.param("id"));
   const { password, ...input } = await body(c, userUpdateSchema);
   // An admin locking themselves out would leave nobody able to undo it.
-  if (id === c.get("user")!.id && (input.role === "user" || input.active === false)) {
+  if (
+    id === c.get("user")!.id &&
+    ((input.role !== undefined && input.role !== "admin") || input.active === false)
+  ) {
     throw new HttpError(400, "Não pode retirar o seu próprio acesso de administrador.");
   }
   const db = c.env.DB;

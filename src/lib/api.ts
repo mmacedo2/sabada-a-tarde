@@ -162,7 +162,7 @@ export type Player = {
   visible: boolean;
 };
 
-export type Role = "admin" | "user";
+export type Role = "admin" | "manager" | "user";
 export type SessionUser = { id: number; email: string; name: string; role: Role };
 export type User = SessionUser & { active: boolean; lastLoginAt: string | null; createdAt: string };
 
