@@ -1,10 +1,10 @@
 name: CI
 
+# Tests run on pull requests only: main only changes through a PR that passed them
+# (see deploy.yml for what runs on main).
 on:
   # Every PR, including ones stacked on another branch.
   pull_request:
-  push:
-    branches: [main]
 
 permissions:
   contents: read
@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  web:
-    name: web
+  test-web:
+    name: test-web
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -30,8 +30,8 @@ jobs:
       - run: bun run typecheck
       - run: bun run build
 
-  api:
-    name: api
+  test-api:
+    name: test-api
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
