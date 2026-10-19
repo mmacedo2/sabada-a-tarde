@@ -4,9 +4,7 @@ import { useState } from "react";
 import heroImg from "@/assets/hero-futebol.jpg";
 import { PageHeader } from "@/components/site/PageHeader";
 
-const photos = [
-  { src: heroImg, caption: "Futebol popular em Guimarães", category: "Competições" },
-];
+const photos = [{ src: heroImg, caption: "Futebol popular em Guimarães", category: "Competições" }];
 
 export const Route = createFileRoute("/galeria")({
   head: () => ({
@@ -14,7 +12,8 @@ export const Route = createFileRoute("/galeria")({
       { title: "Galeria — Sábado à Tarde" },
       {
         name: "description",
-        content: "Fotografias do futebol popular de Guimarães: jogos, competições e momentos da AFPG.",
+        content:
+          "Fotografias do futebol popular de Guimarães: jogos, competições e momentos da AFPG.",
       },
       { property: "og:title", content: "Galeria — Sábado à Tarde" },
       { property: "og:description", content: "Fotografias dos jogos e competições da AFPG." },
@@ -85,7 +84,14 @@ function GalleryPage() {
             aria-label="Fechar imagem"
             className="absolute right-5 top-5 inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-white/20 text-ink-foreground"
           >
-            <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              className="size-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>

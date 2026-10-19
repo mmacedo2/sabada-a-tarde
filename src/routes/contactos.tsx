@@ -54,13 +54,20 @@ function ContactPage() {
       <section className="container-afpg grid gap-4 py-14 md:grid-cols-3 md:py-16">
         {[
           { label: "Sede", value: ASSOCIATION.address },
-          { label: "Telefone", value: `tel. ${ASSOCIATION.phone}`, href: `tel:${ASSOCIATION.phone.replace(/\s/g, "")}` },
+          {
+            label: "Telefone",
+            value: `tel. ${ASSOCIATION.phone}`,
+            href: `tel:${ASSOCIATION.phone.replace(/\s/g, "")}`,
+          },
           { label: "Email", value: ASSOCIATION.email, href: `mailto:${ASSOCIATION.email}` },
         ].map((c) => (
           <div key={c.label} className="rounded-xl border border-border bg-card p-6 shadow-card">
             <p className="eyebrow text-primary">{c.label}</p>
             {c.href ? (
-              <a href={c.href} className="mt-3 block font-display text-lg font-bold hover:text-primary">
+              <a
+                href={c.href}
+                className="mt-3 block font-display text-lg font-bold hover:text-primary"
+              >
                 {c.value}
               </a>
             ) : (
