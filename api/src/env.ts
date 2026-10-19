@@ -3,7 +3,7 @@ export type Env = {
   MEDIA: R2Bucket;
   /** "false" only for plain-http local development. */
   COOKIE_SECURE: string;
-  /** OpenID Connect sign-in (see RUNBOOK.md). Off while issuer, client id and secret are unset. */
+  /** OpenID Connect sign-in. Off while issuer, client id and secret are unset. */
   OIDC_ISSUER?: string;
   OIDC_CLIENT_ID?: string;
   OIDC_CLIENT_SECRET?: string;

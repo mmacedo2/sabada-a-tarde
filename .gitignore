@@ -30,3 +30,36 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Maintainer-only docs, kept out of the public repo
+RUNBOOK.md
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+.dev.vars*
+!.dev.vars.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Archives and local databases
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.sqlite
+*.sqlite3
+*.db
+
+# Build and test output
+*.tsbuildinfo
+coverage
+tests_results/
+
+# Unrelated checkouts
+pytriton/
