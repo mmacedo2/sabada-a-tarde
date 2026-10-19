@@ -17,10 +17,10 @@ INSERT OR IGNORE INTO clubs (slug, name, short_name, initials, locality, crest_u
 
 INSERT OR IGNORE INTO competitions (slug, name, kind, tagline, description, logo_url, source_url, position) VALUES
   ('trofeu-joao-fernandes', 'Troféu João Fernandes', 'cup', 'O pontapé de saída da época', 'Jogo único que abre a nova época e premeia as equipas com melhor fair play da época anterior.', '/competitions/trofeu-joao-fernandes.png', NULL, 0),
-  ('super-liga', 'Super Liga', 'league', '1ª Divisão AFPG', 'A principal competição da AFPG, disputada a duas voltas por todos os clubes filiados da 1ª Divisão.', '/competitions/super-liga.png', 'https://www.afpguimaraes.com/super-liga', 1),
+  ('super-liga', 'Super Liga', 'league', '1ª Divisão AFPG', 'A principal competição da AFPG, disputada a duas voltas por todos os clubes filiados da 1ª Divisão.', '/competitions/super-liga.png', NULL, 1),
   ('taca-associacao', 'Taça Associação', 'cup', 'Competição a eliminar', 'Taça da Associação disputada por eliminatórias entre os clubes filiados na AFPG.', '/competitions/taca-associacao.png', NULL, 2),
-  ('taca-cidade-berco', 'Taça Cidade Berço', 'cup', 'Eliminatórias a duas mãos', 'A taça com o nome da Cidade Berço: quartos de final e meias-finais a duas mãos, com final em campo neutro.', '/competitions/taca-cidade-berco.png', 'https://www.afpguimaraes.com/taca-cidade-berco', 3),
-  ('taca-disciplina', 'Taça de Disciplina', 'award', 'Fair play AFPG', 'Classificação disciplinar acumulada ao longo da época, publicada jornada a jornada.', '/competitions/taca-disciplina.png', 'https://www.afpguimaraes.com/taca-de-disciplina', 4);
+  ('taca-cidade-berco', 'Taça Cidade Berço', 'cup', 'Eliminatórias a duas mãos', 'A taça com o nome da Cidade Berço: quartos de final e meias-finais a duas mãos, com final em campo neutro.', '/competitions/taca-cidade-berco.png', NULL, 3),
+  ('taca-disciplina', 'Taça de Disciplina', 'award', 'Fair play AFPG', 'Classificação disciplinar acumulada ao longo da época, publicada jornada a jornada.', '/competitions/taca-disciplina.png', NULL, 4);
 
 INSERT INTO games (season_id, competition_id, round, stage, home_club_id, away_club_id,
                    home_placeholder, away_placeholder, date, status, home_goals, away_goals)
@@ -115,36 +115,3 @@ SELECT s.id, co.id, v.column2, v.column3, hc.id, ac.id, v.column6, v.column7, v.
   LEFT JOIN clubs hc ON hc.slug = v.column4
   LEFT JOIN clubs ac ON ac.slug = v.column5
  WHERE NOT EXISTS (SELECT 1 FROM games);
-
-INSERT INTO documents (title, category, url)
-SELECT v.column1, v.column2, v.column3
-  FROM (VALUES
-    ('Calendário Super Liga 1ª Divisão 2025/2026', 'Super Liga', 'https://www.afpguimaraes.com/s/Calendario-SUPERLIGA-1a-Divisao-2025-2026-E-GERAL-afg4.pdf'),
-    ('Reajuste do Calendário Geral — 3 de fevereiro de 2026', 'Super Liga', 'https://www.afpguimaraes.com/s/REAJUSTE-do-Calendario-Geral-Epoca-2025-2026-3-de-fevereiro-2026.pdf'),
-    ('Agenda de fim de semana — 14ª Jornada', 'Super Liga', 'https://www.afpguimaraes.com/s/agenda-fim-de-semana-25-26-14-JORNADA.pdf'),
-    ('Classificação Super Liga — 14ª Jornada (final)', 'Super Liga', 'https://www.afpguimaraes.com/s/Classificacao-14-JORNADA-SUPERLIGA-1a-Divisao-2025-2026.pdf'),
-    ('Classificação Super Liga — 13ª Jornada', 'Super Liga', 'https://www.afpguimaraes.com/s/Classificacao-13-JORNADA-SUPERLIGA-1a-Divisao-2025-2026.pdf'),
-    ('Classificação Super Liga — 12ª Jornada', 'Super Liga', 'https://www.afpguimaraes.com/s/Classificacao-12-JORNADA-SUPERLIGA-1a-Divisao-2025-2026.pdf'),
-    ('Resultados de fim de semana — 14ª Jornada', 'Super Liga', 'https://www.afpguimaraes.com/s/Resultados-fim-de-semana-25-26-14-JORNADA.pdf'),
-    ('Resultados de fim de semana — 13ª Jornada', 'Super Liga', 'https://www.afpguimaraes.com/s/Resultados-fim-de-semana-25-26-13-JORNADA.pdf'),
-    ('Resultados de fim de semana — 12ª Jornada', 'Super Liga', 'https://www.afpguimaraes.com/s/Resultados-fim-de-semana-25-26-12-JORNADA-fmzj.pdf'),
-    ('Calendário Taça Cidade Berço 2025/2026 (completo)', 'Taça Cidade Berço', 'https://www.afpguimaraes.com/s/Calendario-Taca-Cidade-Berco-2025-2026-COMPLETA.pdf'),
-    ('Taça Cidade Berço — Final 2025/2026', 'Taça Cidade Berço', 'https://www.afpguimaraes.com/s/Calendario-Taca-Cidade-Berco-FINAL-2025-2026.pdf'),
-    ('Meias-Finais 1ª Mão — calendário', 'Taça Cidade Berço', 'https://www.afpguimaraes.com/s/Calendario-Taca-Cidade-Berco-1-MO-MEIAS-FINAIS-2025-2026-Copia.pdf'),
-    ('Meias-Finais 2ª Mão — resultado', 'Taça Cidade Berço', 'https://www.afpguimaraes.com/s/resultado-Taca-Cidade-Berco-2-MO-MEIAS-FINAIS-2025-2026.pdf'),
-    ('Quartos de Final 2ª Mão — resultado', 'Taça Cidade Berço', 'https://www.afpguimaraes.com/s/resultado-Taca-Cidade-Berco-2-MO-QUARTOS-FINAIS-2025-2026-Copia.pdf'),
-    ('Classificação Disciplina — até à 14ª Jornada', 'Taça de Disciplina', 'https://www.afpguimaraes.com/s/Classificacao-Disciplina-14-JORNADAmeias-finais-taca-cb-2025-2026-Copia.pdf'),
-    ('Classificação Disciplina — até à 13ª Jornada', 'Taça de Disciplina', 'https://www.afpguimaraes.com/s/Classificacao-Disciplina-13-JORNADAmeias-finais-taca-cb-2025-2026.pdf'),
-    ('Classificação Disciplina — até à 12ª Jornada', 'Taça de Disciplina', 'https://www.afpguimaraes.com/s/Classificacao-Disciplina-12-JORNADAmeias-finais-taca-cb-2025-2026.pdf'),
-    ('Classificação Disciplina — até à 10ª Jornada', 'Taça de Disciplina', 'https://www.afpguimaraes.com/s/Classificacao-Disciplina-10-JORNADA-2025-2026.pdf'),
-    ('Melhor Marcador — classificação final (14ª jornada)', 'Prémios', 'https://www.afpguimaraes.com/melhor-marcador'),
-    ('Melhor Jogador — classificação final (14ª jornada)', 'Prémios', 'https://www.afpguimaraes.com/melhor-jogador'),
-    ('Regulamentos AFPG', 'Regulamentos', 'https://www.afpguimaraes.com/regulamentos-afpg'),
-    ('Impressos AFPG', 'Impressos AFPG', 'https://www.afpguimaraes.com/impressos-afpg'),
-    ('Impressos FFPN', 'Impressos FFPN', 'https://www.afpguimaraes.com/impressos-ffpn'),
-    ('Secretaria — informação e horários', 'Secretaria', 'https://www.afpguimaraes.com/secretaria'),
-    ('Conselho de Disciplina — comunicados', 'Conselho de Disciplina', 'https://www.afpguimaraes.com/conselho-de-disciplina'),
-    ('Interconcelhias FFPN', 'Interconcelhias FFPN', 'https://www.afpguimaraes.com/interconcelhias-ffpn'),
-    ('Agenda semanal', 'Comunicados', 'https://www.afpguimaraes.com/agenda-semanal')
-  ) v
- WHERE NOT EXISTS (SELECT 1 FROM documents);

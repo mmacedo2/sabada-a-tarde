@@ -68,12 +68,10 @@ function Home() {
     .sort(byDateAsc)
     .slice(0, 6);
   const comunicados = documents.slice(0, 6);
-  const spotlight = live[0] ?? upcoming[0] ?? results[0];
-  const spotlightLabel = live[0] ? "Ao vivo" : upcoming[0] ? "Próximo jogo" : "Último resultado";
 
   return (
     <>
-      {/* HERO: short intro next to the game that matters right now */}
+      {/* HERO */}
       <section className="relative isolate overflow-hidden bg-ink text-ink-foreground">
         <img
           src={heroImg}
@@ -83,7 +81,7 @@ function Home() {
           className="absolute inset-0 size-full object-cover opacity-35"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/85 to-ink/40 lg:bg-gradient-to-r" />
-        <div className="container-afpg relative grid items-center gap-10 py-12 md:py-16 lg:grid-cols-[1.1fr_1fr] lg:py-20">
+        <div className="container-afpg relative py-12 md:py-16 lg:py-20">
           <div className="animate-fade-up">
             <p className="eyebrow text-primary">
               Futebol Popular de Guimarães{season && ` · Época ${season.name}`}
@@ -110,14 +108,6 @@ function Home() {
               </Link>
             </div>
           </div>
-          {spotlight && (
-            <div className="animate-fade-up">
-              <p className="eyebrow mb-3 text-ink-muted">{spotlightLabel}</p>
-              <div className="text-card-foreground">
-                <MatchCard match={spotlight} />
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -289,36 +279,38 @@ function Home() {
       )}
 
       {/* COMUNICADOS */}
-      <section className="container-afpg pb-4">
-        <SectionTitle
-          eyebrow="Informação oficial"
-          title="Documentos da Associação"
-          action={
-            <Link to="/documentos" className="eyebrow text-primary hover:underline">
-              Todos os documentos →
-            </Link>
-          }
-        />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {comunicados.map((doc) => (
-            <a
-              key={doc.id}
-              href={doc.url}
-              target="_blank"
-              rel="noreferrer"
-              className="group flex flex-col justify-between rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:-translate-y-1 hover:shadow-lift"
-            >
-              <div>
-                <p className="eyebrow text-primary">{doc.category}</p>
-                <h3 className="mt-3 font-display text-lg font-bold leading-snug">{doc.title}</h3>
-              </div>
-              <p className="eyebrow mt-6 text-muted-foreground transition-colors group-hover:text-primary">
-                Abrir documento →
-              </p>
-            </a>
-          ))}
-        </div>
-      </section>
+      {comunicados.length > 0 && (
+        <section className="container-afpg pb-4">
+          <SectionTitle
+            eyebrow="Informação oficial"
+            title="Documentos da Associação"
+            action={
+              <Link to="/documentos" className="eyebrow text-primary hover:underline">
+                Todos os documentos →
+              </Link>
+            }
+          />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {comunicados.map((doc) => (
+              <a
+                key={doc.id}
+                href={doc.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex flex-col justify-between rounded-xl border border-border bg-card p-6 shadow-card transition-all hover:-translate-y-1 hover:shadow-lift"
+              >
+                <div>
+                  <p className="eyebrow text-primary">{doc.category}</p>
+                  <h3 className="mt-3 font-display text-lg font-bold leading-snug">{doc.title}</h3>
+                </div>
+                <p className="eyebrow mt-6 text-muted-foreground transition-colors group-hover:text-primary">
+                  Abrir documento →
+                </p>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }
