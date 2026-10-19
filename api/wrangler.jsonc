@@ -15,6 +15,7 @@
     {
       "binding": "DB",
       "database_name": "sabado-a-tarde",
+      "database_id": "1616d2b4-34c7-4e41-b8a7-927886de251f",
       "migrations_dir": "migrations"
     }
   ],

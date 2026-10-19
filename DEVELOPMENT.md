@@ -80,51 +80,14 @@ D1 applies the `.sql` files in `api/migrations/` in name order and records which
 1. Create the next file: `cd api && npx wrangler d1 migrations create DB add_player_number -c wrangler.jsonc`
    (creates `0002_add_player_number.sql`).
 2. Write forward-only SQL. D1 has no "down" migrations. To undo a bad migration, write a new
-   migration that reverses it, or restore the database with Time Travel (below).
+   migration that reverses it, or restore the database with Time Travel (see RUNBOOK.md).
 3. Apply locally (`npm run db:migrate:local`, or restart the container), then run `npm test`.
    The tests always run against all migrations.
 4. Apply to production with `npm run db:migrate:remote`, **before** deploying code that needs the change.
 
 Never edit a migration that has already run in production.
 
-## Deploying to Cloudflare (first time)
+## Deploying to Cloudflare
 
-Run these from your machine with your personal Cloudflare account.
-
-1. **Account.** Sign up at dash.cloudflare.com. The Workers Free plan is enough to start.
-2. **Log in Wrangler.** `cd api && npx wrangler login`, then `npx wrangler whoami` to confirm it's
-   the right account.
-3. **Create the database.** `npx wrangler d1 create sabado-a-tarde`. Copy the printed
-   `database_id` into `api/wrangler.jsonc` under `d1_databases`.
-4. **Create the bucket.** Enable R2 in the dashboard (Cloudflare may ask for a payment method even
-   for free-tier usage), then run `npx wrangler r2 bucket create sabado-a-tarde-media`.
-5. **Schema and starter data.**
-   ```bash
-   npm ci
-   npm run db:migrate:remote
-   npm run db:seed:remote
-   npm run admin:create -- --email you@example.com --name "Your Name" --remote
-   ```
-6. **Deploy the API.** `npm run deploy`. It has no public URL (`workers_dev: false`), which is intended.
-7. **Deploy the site.** From the repo root:
-   ```bash
-   bun run build
-   npx wrangler@4.145.0 deploy   # uses the config generated in .output/
-   ```
-   It is served at `https://sabado-a-tarde-web.<your-subdomain>.workers.dev`.
-8. **Custom domain (optional).** In the dashboard, open Workers → `sabado-a-tarde-web` → Settings →
-   Domains & Routes → add your domain (it must be on Cloudflare DNS).
-9. **Check it works.** Open `/entrar`, log in, and open `/admin`.
-
-After that, deploy in this order: migrations (if any), then the API, then the site.
-
-### Free-plan limits worth knowing
-
-- **Workers:** 100,000 requests per day and **10 ms CPU per request**. Password hashing
-  (PBKDF2, 100k iterations) is close to that limit, so a login can occasionally fail with error
-  1102. If that happens, Workers Paid ($5/month) removes the limit. Reading pages is well within it.
-- **D1:** 5M rows read and 100k rows written per day, 500 MB per database. Over the limit, queries
-  fail until midnight UTC.
-- **R2:** 10 GB storage and free egress.
-- **Backups:** D1 Time Travel restores to any minute in the last 7 days on Free (30 on Paid):
-  `npx wrangler d1 time-travel restore sabado-a-tarde --timestamp=<RFC3339> -c wrangler.jsonc`.
+See [RUNBOOK.md](RUNBOOK.md): first-time setup, routine deploys, backups, restores, rollbacks,
+free-plan limits and troubleshooting.
