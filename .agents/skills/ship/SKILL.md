@@ -14,8 +14,7 @@ Work on a branch named after the change (`feat/…`, `fix/…`, `chore/…`, `do
 from an up-to-date `main`. Run the checks again:
 
 ```bash
-bun run lint && bun run typecheck && bun run build
-cd api && npm run typecheck && npm test
+make test
 ```
 
 If a lockfile changed, it must only point at public npm:
@@ -39,6 +38,7 @@ gh pr create --base main --title "<the commit's first line>" --body-file <file>
 ```
 
 The body has three short sections:
+
 - **What:** the change, from the user's side first.
 - **Deploy:** a new migration (`db:migrate:remote` first), new secrets, or "nothing special".
 - **Testing:** the checks that ran, and what the maintainer tried locally.
@@ -62,16 +62,18 @@ they've said to merge. The branch is deleted automatically.
 
 ## 6. Deploy, only when asked
 
-Each command changes production, so confirm each one with the maintainer before running it. From
-an up-to-date `main`, in this order:
+Merging does not deploy. A production deploy is the maintainer's to run, because it asks for
+confirmation in their own terminal. When they want to deploy, tell them to run, from an
+up-to-date `main` (in Claude Code: `! make deploy`):
 
 ```bash
-cd api
-npm run db:migrate:remote                       # only if there is a new migration
-npm run deploy                                  # only if api/ changed
-cd ..
-bun run build && npx wrangler@4.145.0 deploy    # only if the site changed
+make deploy
 ```
+
+It runs the checks, then applies migrations, deploys the API and deploys the site, in that
+order. It refuses to run from another branch, with uncommitted changes, or when `main` differs
+from `origin/main`. Never run it yourself with `CONFIRM=yes`. Single steps exist too: `make
+migration`, `make build_and_deploy_backend`, `make build_and_deploy_frontend`.
 
 Then check that `/api/health` on the live site returns `{"ok":true}` and that the changed pages
 work. To undo a deploy: `npx wrangler rollback <version-id> --name sabado-a-tarde-web` (or

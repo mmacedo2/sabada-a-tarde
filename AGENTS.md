@@ -21,14 +21,16 @@ Every feature, fix and migration goes through these steps, in this order:
 4. **Wait for the maintainer.** They test in the browser and say when they're satisfied. No
    commit, push or PR before that.
 5. **Open the PR** with the `ship` skill: push, PR to `main`, CI green. Merge only when asked.
-6. **Deploy only when asked**, in this order: migrations, then the API, then the site.
+6. **Deploy only when asked**, with `make deploy`: checks, then migrations, the API and the site.
 
-## Checks (the same ones CI runs)
+## Checks
 
 ```bash
-bun run lint && bun run typecheck && bun run build      # repo root
-cd api && npm run typecheck && npm test                  # API
+make test             # what CI runs: lint, type checks, API tests, site build
+make test_security    # Semgrep, Gitleaks and dependency audits (needs Docker)
 ```
+
+`make help` lists every target, including the local environment (`local_*`) and production ones.
 
 ## Rules
 
