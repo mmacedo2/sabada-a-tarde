@@ -69,9 +69,12 @@ there; change data through the admin so the audit log records it.
 ### Tests and checks
 
 ```bash
-cd api && npm test && npm run typecheck   # API tests run inside workerd with a real D1
-npx tsc --noEmit && npx eslint .          # frontend (repo root)
+make test             # lint, type checks, API tests (in workerd with a real D1), site build
+make test_security    # Semgrep, Gitleaks and dependency audits (Docker)
 ```
+
+`make help` lists every target. `make local` starts the API, its local database and the site in one
+go; `make deploy` deploys to production and asks before changing anything.
 
 ## Database migrations
 
