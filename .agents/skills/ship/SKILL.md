@@ -49,7 +49,8 @@ The body has three short sections:
 gh pr checks <number> --watch
 ```
 
-The `test-web` and `test-api` checks are required. Fix a failure with a new commit; never force-push.
+All six checks are required: `web-lint`, `web-types`, `web-build`, `api-lint`, `api-types` and
+`api-unit`. Each runs one `make test_*` target, so reproduce a failure with that target. Fix a failure with a new commit; never force-push.
 
 ## 5. Merge, only when asked
 

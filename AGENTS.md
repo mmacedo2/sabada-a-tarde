@@ -29,11 +29,13 @@ Every feature, fix and migration goes through these steps, in this order:
 ## Checks
 
 ```bash
-make test             # what CI runs: lint, type checks, API tests, site build
+make test             # what CI runs: make test_web (lint, types, build) + make test_api (lint, types, tests)
 make test_security    # Semgrep, Gitleaks and dependency audits (needs Docker)
 ```
 
-`make help` lists every target, including the local environment (`local_*`) and production ones.
+Each CI job runs one of these targets (`web-lint` runs `make test_web_lint`, and so on), so
+`make <target>` reproduces a failing job locally. `make help` lists every target, including the
+local environment (`local_*`) and production ones.
 
 ## Rules
 

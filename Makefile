@@ -12,7 +12,8 @@ GITLEAKS_IMAGE := ghcr.io/gitleaks/gitleaks:v8.30.1
 # Local site port. Google sign-in only works on 8080, the redirect URI registered at Google.
 PORT ?= 8080
 
-.PHONY: help test test_lint test_unit test_build test_security test_sast test_secrets test_deps \
+.PHONY: help test test_web test_web_lint test_web_types test_web_build \
+	test_api test_api_lint test_api_types test_api_unit test_security test_sast test_secrets test_deps \
 	deploy migration build_and_deploy_backend build_and_deploy_frontend _production_guard \
 	local local_migration local_build_and_deploy_backend local_build_and_deploy_frontend \
 	local_role local_logs local_down local_reset
@@ -24,18 +25,29 @@ help: ## Show this list
 
 ##@ Checks
 
-test: test_lint test_unit test_build ## Everything CI runs
+test: test_web test_api ## Everything CI runs on a pull request
 
-test_lint: ## Lint and type-check the site and the API
-	bun run lint
+test_web: test_web_lint test_web_types test_web_build ## All site checks
+
+test_web_lint: ## Site: eslint, formatting included
+	bunx eslint . --ignore-pattern "api/**"
+
+test_web_types: ## Site: TypeScript type check
 	bun run typecheck
+
+test_web_build: ## Site: production build
+	bun run build
+
+test_api: test_api_lint test_api_types test_api_unit ## All API checks
+
+test_api_lint: ## API: eslint, formatting included
+	bunx eslint api
+
+test_api_types: ## API: TypeScript type check
 	cd api && npm run typecheck
 
-test_unit: ## API tests (run inside workerd with a real D1)
+test_api_unit: ## API: tests, inside workerd with a real D1
 	cd api && npm test
-
-test_build: ## Production build of the site
-	bun run build
 
 test_security: test_sast test_secrets test_deps ## All three security checks below
 
@@ -53,7 +65,7 @@ test_deps: ## Known high or critical vulnerabilities in what ships to production
 
 ##@ Production (changes the live site)
 
-deploy: test_lint test_unit _production_guard migration build_and_deploy_backend build_and_deploy_frontend ## Checks, then migrations, API and site, in that order
+deploy: test_web_lint test_web_types test_api _production_guard migration build_and_deploy_backend build_and_deploy_frontend ## Checks, then migrations, API and site, in that order
 
 migration: _production_guard ## Apply new migrations to the production database
 	cd api && npm run db:migrate:remote
