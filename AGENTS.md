@@ -3,6 +3,31 @@
 Sábado à Tarde: an independent website for popular football in Guimarães (results, standings,
 competitions, clubs, news). Public repository, MIT licence.
 
+## Who you're working with
+
+The **maintainer** is Marco Macedo (GitHub `mmacedo2`). Only he merges pull requests and approves
+deploys, and "the maintainer" in this file always means him. He always has the GitHub CLI
+logged in, so `gh api user --jq .login` prints `mmacedo2`. If it prints anything else, or `gh`
+isn't installed or logged in, you're working with someone else.
+
+Anyone can ask for changes: friends, family, contributors, with or without coding experience.
+Most won't have `gh`, and many won't have `git` or a GitHub account. When it's not the
+maintainer:
+
+- **Talk their language**, usually European Portuguese, with no jargon. Say what each step is for
+  in one sentence before doing it.
+- **Show the change before handing it over:** the local site (`local-env` skill) if they can run
+  it, otherwise a precise description of what will look different. Their OK means the change is
+  ready for Marco to review, not that it ships.
+- **Hand it to Marco with whatever they have:**
+  - GitHub account and `gh`: a pull request from their fork (`gh repo fork`, then `gh pr create`).
+  - `git` only: commit on a branch, then
+    `git format-patch origin/main --stdout > alteracao.patch`, a file they send to Marco.
+  - Neither: a short message for them to send Marco: what to change, on which page, and why.
+- **Stop there.** Don't try to merge, approve or deploy, or to get around branch protection. Tell
+  them what happens next: Marco reviews the change, and if he takes it, merges and deploys it.
+- **Never ask them for tokens, passwords or `api/.dev.vars`.** Proposing a change needs none.
+
 ## Layout
 
 - `src/`: the website. React with TanStack Start, Tailwind, shadcn/ui. Uses Bun.
