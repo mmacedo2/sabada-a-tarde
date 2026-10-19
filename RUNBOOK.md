@@ -139,6 +139,37 @@ On `https://sabado-a-tarde-web.<subdomain>.workers.dev`:
 4. A custom domain matches one exact hostname. To also serve `www.`, add it as a second custom domain,
    or add a redirect rule from `www` to the bare domain.
 
+### 1.9 Sign in and registration with Google (optional)
+
+"Entrar com Google" lets anyone create an account on the site with the `user` role. An existing
+account (yours, for example) is linked by its email the first time it signs in with Google, as
+long as Google has verified that email. Admin rights are still only given in Admin → Utilizadores.
+The button appears only when the three settings below are set. Any OpenID Connect provider works the
+same way; only the issuer changes.
+
+1. <https://console.cloud.google.com> → create a project → **Google Auth Platform** → **Branding**:
+   app name, support email. **Audience**: External, then **Publish app** (in Testing, only listed
+   test users can sign in).
+2. **Clients** → **Create client** → Web application. **Authorized redirect URIs**, one per address
+   the site runs on:
+   - `https://sabado-a-tarde-web.<subdomain>.workers.dev/api/auth/oidc/callback`
+   - `https://sabadoatarde.pt/api/auth/oidc/callback` (each custom domain)
+   - `http://localhost:8080/api/auth/oidc/callback` (local development)
+3. Give the API Worker the client's values:
+   ```bash
+   api$ npx wrangler secret put OIDC_ISSUER -c wrangler.jsonc          # https://accounts.google.com
+   api$ npx wrangler secret put OIDC_CLIENT_ID -c wrangler.jsonc
+   api$ npx wrangler secret put OIDC_CLIENT_SECRET -c wrangler.jsonc
+   api$ npx wrangler secret put OIDC_PROVIDER_NAME -c wrangler.jsonc   # Google
+   ```
+   Locally, put the same lines in `api/.dev.vars` and run the API with `npm run dev` in `api/`
+   (the Docker image leaves `.dev.vars` out).
+
+To turn it off again, delete all three of `OIDC_ISSUER`, `OIDC_CLIENT_ID` and `OIDC_CLIENT_SECRET`
+(`npx wrangler secret delete <name> -c wrangler.jsonc`): with only some of them set, the API logs
+an error and the button disappears. Accounts created through Google can then sign in only after an
+admin sets them a password.
+
 ### Doing the same from the terminal
 
 | Dashboard step | Command |

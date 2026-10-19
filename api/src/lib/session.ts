@@ -11,13 +11,13 @@ async function sha256Hex(value: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function randomToken(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return btoa(String.fromCharCode(...bytes))
+export const base64Url = (bytes: Uint8Array) =>
+  btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
-}
+
+export const randomToken = () => base64Url(crypto.getRandomValues(new Uint8Array(32)));
 
 const cookieOptions = (c: Context<AppEnv>) =>
   ({
