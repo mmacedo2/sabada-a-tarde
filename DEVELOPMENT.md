@@ -10,7 +10,7 @@ browser ──► sabado-a-tarde-web (Worker)        TanStack Start: SSR pages +
               │  SSR data ─service binding──►     Hono · D1 (SQLite) · R2 (uploaded images)
 ```
 
-- **Frontend** (repo root): TanStack Start (Lovable UI). Pages load data in route `loader`s, so news
+- **Frontend** (repo root): TanStack Start. Pages load data in route `loader`s, so news
   and fixtures are server-rendered (good for SEO and for link previews on Facebook and WhatsApp).
   The admin area (`/admin/*`) renders only in the browser.
 - **API** (`api/`): Hono on Workers. Public read endpoints, `/api/auth/*`, and `/api/admin/*`
