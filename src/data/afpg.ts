@@ -6,7 +6,6 @@ export const ASSOCIATION = {
   phone: "253 512 680",
   fax: "253 512 680",
   email: "geral.afpg@sapo.pt",
-  site: "www.afpguimaraes.com",
 };
 
 export const formatDate = (iso: string) =>

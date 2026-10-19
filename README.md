@@ -2,7 +2,7 @@
 
 **O futebol popular de Guimarães num só sítio.** Resultados, classificações, competições, clubes e notícias da Associação de Futebol Popular de Guimarães (AFPG), num site moderno, rápido e pensado para o telemóvel.
 
-É um projeto independente, feito por e para os adeptos. Não é o site oficial da AFPG, que continua em [afpguimaraes.com](https://www.afpguimaraes.com/). Em breve em **sabadoatarde.pt**.
+É um projeto independente, feito por e para os adeptos. Em breve em **sabadoatarde.pt**.
 
 ## O que tem
 
