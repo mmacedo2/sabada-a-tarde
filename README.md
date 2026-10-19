@@ -1,41 +1,33 @@
 # Sábado à Tarde
 
-Quero fazer um redesign COMPLETO do website da Associação de Futebol Popular de Guimarães (AFPG):
+**O futebol popular de Guimarães num só sítio.** Resultados, classificações, competições, clubes e notícias da Associação de Futebol Popular de Guimarães (AFPG), num site moderno, rápido e pensado para o telemóvel.
 
-https://www.afpguimaraes.com/
+É um projeto independente, feito por e para os adeptos. Não é o site oficial da AFPG, que continua em [afpguimaraes.com](https://www.afpguimaraes.com/). Em breve em **sabadoatarde.pt**.
 
-O objetivo não é simplesmente mudar cores ou trocar o template. Quero criar uma versão muito mais moderna, profissional, desportiva e visualmente apelativa da AFPG, mantendo a identidade histórica da Associação e, principalmente, mantendo a identidade individual de todos os clubes/equipas.
+## O que tem
 
-1. OBJETIVO GERAL
+- **Jogos e resultados**, incluindo jogos ao vivo, com golos e cartões.
+- **Classificações** atualizadas automaticamente a cada resultado.
+- **Competições**: a Super Liga e as taças da AFPG, cada uma com a sua página.
+- **Clubes**, com símbolo, cores, plantel e jogos de cada equipa.
+- **Notícias, transferências e documentos** (regulamentos, calendários, comunicados).
+- **Contas de utilizador**, criadas com email ou com Google.
+- **Área de gestão** com três perfis: utilizador, gestor de jogos (lança resultados) e administrador.
 
-Transformar o atual website da Associação de Futebol Popular de Guimarães num website com aparência de uma organização desportiva moderna e profissional.
+## Stack
 
-O resultado deve transmitir:
+| | |
+|---|---|
+| **Site** | React com TanStack Start, com as páginas geradas no servidor para carregarem depressa e aparecerem bem nas pesquisas e nas partilhas |
+| **Design** | Tailwind CSS e componentes shadcn/ui |
+| **API** | TypeScript com Hono |
+| **Base de dados** | Cloudflare D1 |
+| **Imagens** | Cloudflare R2 |
+| **Alojamento** | Cloudflare Workers |
+| **Login** | Email e palavra-passe, ou Google |
+| **Qualidade** | Testes automáticos e verificações em cada pull request, com GitHub Actions |
 
-Futebol
-
-Competição
-
-Comunidade
-
-Tradição
-
-Guimarães
-
-Modernidade
-
-Credibilidade
-
-Paixão pelo futebol popular
-
-Quero uma estética comparável à de websites modernos de federações, ligas e competições desportivas, mas sem copiar nenhuma identidade existente.
-
-O site atual deve ser utilizado como referência de conteúdo e estrutura, mas NÃO como referência visual.
-
-Website atual:
-https://www.afpguimaraes.com/
-
-Analisa o website atual, as páginas existentes, os menus, as competições, os clubes, os símbolos e a informação disponível antes de começares a desenvolver.
+Tudo corre na Cloudflare: o site e a API estão separados, e só o site está exposto à internet.
 
 ## Contribuir
 
