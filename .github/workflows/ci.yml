@@ -1,7 +1,8 @@
 name: CI
 
 # Tests run on pull requests only: main only changes through a PR that passed them
-# (see deploy.yml for what runs on main).
+# (see deploy.yml for what runs on main). One job per check, each a `make` target,
+# so a failure names exactly what broke and `make <target>` reproduces it locally.
 on:
   # Every PR, including ones stacked on another branch.
   pull_request:
@@ -14,38 +15,69 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-web:
-    name: test-web
+  web-lint:
+    name: web-lint
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version: 1.4.3
-      - run: bun install --frozen-lockfile
-      - run: bun run lint
-      - run: bun run typecheck
-      - run: bun run build
+      - uses: ./.github/actions/setup-web
+      - run: make test_web_lint
 
-  test-api:
-    name: test-api
+  web-types:
+    name: web-types
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: api
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: ./.github/actions/setup-web
+      - run: make test_web_types
+
+  web-build:
+    name: web-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: api/package-lock.json
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm test
+          persist-credentials: false
+      - uses: ./.github/actions/setup-web
+      - run: make test_web_build
+
+  # eslint lives in the root package, so API lint needs the site's dependencies.
+  api-lint:
+    name: api-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-web
+      - run: make test_api_lint
+
+  api-types:
+    name: api-types
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-api
+      - run: make test_api_types
+
+  api-unit:
+    name: api-unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-api
+      - run: make test_api_unit
