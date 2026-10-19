@@ -46,3 +46,7 @@ Todos são bem-vindos a contribuir! Correções, ideias, melhorias de design ou 
 3. Abre um pull request para `main` a explicar o que mudou e porquê.
 
 Todos os pull requests são revistos e aprovados pelo maintainer antes de entrarem em `main`. Para ideias maiores, abre primeiro uma issue para falarmos sobre elas.
+
+## Licença
+
+[MIT](LICENSE): podes usar, alterar e distribuir o código livremente, desde que mantenhas o aviso de copyright. Ao contribuíres, aceitas que a tua contribuição fica sob a mesma licença.
