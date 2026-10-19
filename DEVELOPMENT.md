@@ -80,7 +80,7 @@ D1 applies the `.sql` files in `api/migrations/` in name order and records which
 1. Create the next file: `cd api && npx wrangler d1 migrations create DB add_player_number -c wrangler.jsonc`
    (creates `0002_add_player_number.sql`).
 2. Write forward-only SQL. D1 has no "down" migrations. To undo a bad migration, write a new
-   migration that reverses it, or restore the database with Time Travel (see RUNBOOK.md).
+   migration that reverses it, or restore the database with D1 Time Travel (maintainer only).
 3. Apply locally (`npm run db:migrate:local`, or restart the container), then run `npm test`.
    The tests always run against all migrations.
 4. Apply to production with `npm run db:migrate:remote`, **before** deploying code that needs the change.
@@ -89,5 +89,5 @@ Never edit a migration that has already run in production.
 
 ## Deploying to Cloudflare
 
-See [RUNBOOK.md](RUNBOOK.md): first-time setup, routine deploys, backups, restores, rollbacks,
-free-plan limits and troubleshooting.
+Deploys, backups, restores and rollbacks are done by the maintainer and are not part of this
+repository. Contributors only need the local setup above.

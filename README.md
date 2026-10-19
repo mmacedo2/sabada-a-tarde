@@ -36,3 +36,13 @@ Website atual:
 https://www.afpguimaraes.com/
 
 Analisa o website atual, as páginas existentes, os menus, as competições, os clubes, os símbolos e a informação disponível antes de começares a desenvolver.
+
+## Contribuir
+
+Todos são bem-vindos a contribuir! Correções, ideias, melhorias de design ou de conteúdo: tudo ajuda.
+
+1. Faz um fork do repositório e cria um branch a partir de `main`.
+2. Segue o [DEVELOPMENT.md](DEVELOPMENT.md) para correr o projeto localmente.
+3. Abre um pull request para `main` a explicar o que mudou e porquê.
+
+Todos os pull requests são revistos e aprovados pelo maintainer antes de entrarem em `main`. Para ideias maiores, abre primeiro uma issue para falarmos sobre elas.
