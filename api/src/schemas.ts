@@ -62,16 +62,25 @@ export const changePasswordSchema = z.object({
   newPassword: password,
 });
 
+const role = z.enum(["user", "manager", "admin"]);
+
 export const userCreateSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
   name: requiredText(120),
   password,
-  role: z.enum(["admin", "user"]).default("user"),
+  role: role.default("user"),
+});
+
+/** Self-registration: always the `user` role, whatever else the body says. */
+export const registerSchema = z.object({
+  email: z.string().trim().toLowerCase().email().max(254),
+  name: requiredText(120),
+  password,
 });
 
 export const userUpdateSchema = z.object({
   name: requiredText(120).optional(),
-  role: z.enum(["admin", "user"]).optional(),
+  role: role.optional(),
   active: z.boolean().optional(),
   password: password.optional(),
 });

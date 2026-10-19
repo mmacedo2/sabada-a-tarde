@@ -2,14 +2,15 @@ import { Link, type LinkProps } from "@tanstack/react-router";
 
 import { useSession } from "@/hooks/use-session";
 
-/** Shortcut from a public page to its admin screen, shown only to admins. */
+/** Shortcut from a public page to its admin screen, shown to admins (and managers, for games). */
 export function AdminEditLink({
   label,
   className = "",
+  forManagers = false,
   ...link
-}: LinkProps & { label: string; className?: string }) {
-  const { isAdmin } = useSession();
-  if (!isAdmin) return null;
+}: LinkProps & { label: string; className?: string; forManagers?: boolean }) {
+  const { isAdmin, canEditGames } = useSession();
+  if (!(forManagers ? canEditGames : isAdmin)) return null;
   return (
     <Link
       {...link}

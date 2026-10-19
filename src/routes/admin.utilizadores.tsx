@@ -16,7 +16,12 @@ import { api, type Role, type User } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/utilizadores")({ component: UsersAdmin });
 
-const roleLabel: Record<Role, string> = { admin: "Administrador", user: "Utilizador" };
+const roleLabel: Record<Role, string> = {
+  admin: "Administrador",
+  manager: "Gestor de jogos",
+  user: "Utilizador",
+};
+const roles = Object.keys(roleLabel) as Role[];
 
 function UsersAdmin() {
   const { user: me } = Route.useRouteContext();
@@ -101,8 +106,11 @@ function UsersAdmin() {
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value as Role })}
               >
-                <option value="admin">{roleLabel.admin}</option>
-                <option value="user">{roleLabel.user}</option>
+                {roles.map((r) => (
+                  <option key={r} value={r}>
+                    {roleLabel[r]}
+                  </option>
+                ))}
               </select>
             )}
           </Field>
@@ -134,19 +142,21 @@ function UsersAdmin() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <select
+                    aria-label={`Perfil de ${u.name}`}
+                    className="h-8 rounded-md border border-input bg-background px-2 text-sm"
                     disabled={self || update.isPending}
-                    onClick={() =>
-                      update.mutate({
-                        id: u.id,
-                        input: { role: u.role === "admin" ? "user" : "admin" },
-                      })
+                    value={u.role}
+                    onChange={(e) =>
+                      update.mutate({ id: u.id, input: { role: e.target.value as Role } })
                     }
                   >
-                    {u.role === "admin" ? "Retirar admin" : "Tornar admin"}
-                  </Button>
+                    {roles.map((r) => (
+                      <option key={r} value={r}>
+                        {roleLabel[r]}
+                      </option>
+                    ))}
+                  </select>
                   <Button
                     variant="outline"
                     size="sm"

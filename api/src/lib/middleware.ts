@@ -39,9 +39,26 @@ export const requireUser = createMiddleware<AppEnv>(async (c, next) => {
   await next();
 });
 
-export const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
+const MANAGER_READS = new Set(["/clubs", "/competitions", "/seasons"]);
+
+/**
+ * What a manager may do under /api/admin: everything on games except deleting one,
+ * and reading the lists the game form needs. Anything not listed is admin-only.
+ */
+export function managerMay(method: string, adminPath: string): boolean {
+  if (adminPath === "/games" || adminPath.startsWith("/games/")) {
+    return !(method === "DELETE" && /^\/games\/\d+$/.test(adminPath));
+  }
+  return method === "GET" && MANAGER_READS.has(adminPath);
+}
+
+/** Guards /api/admin: admins everywhere, managers where managerMay allows. */
+export const requireStaff = createMiddleware<AppEnv>(async (c, next) => {
   const user = c.get("user");
   if (!user) throw new HttpError(401, "Sessão expirada. Inicie sessão novamente.");
-  if (user.role !== "admin") throw new HttpError(403, "Sem permissão para esta ação.");
+  const adminPath = c.req.path.replace(/^\/api\/admin/, "");
+  const allowed =
+    user.role === "admin" || (user.role === "manager" && managerMay(c.req.method, adminPath));
+  if (!allowed) throw new HttpError(403, "Sem permissão para esta ação.");
   await next();
 });

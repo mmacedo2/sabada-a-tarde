@@ -2,7 +2,7 @@ import { Hono } from "hono";
 
 import type { AppEnv } from "./env";
 import { constraintError, HttpError } from "./lib/http";
-import { loadSession, requireAdmin, sameOriginWrites } from "./lib/middleware";
+import { loadSession, requireStaff, sameOriginWrites } from "./lib/middleware";
 import { articleRoutes } from "./routes/admin/articles";
 import { auditRoutes } from "./routes/admin/audit";
 import { crudRoutes } from "./routes/admin/crud";
@@ -16,7 +16,7 @@ import { publicRoutes } from "./routes/public";
 import { clubSchema, competitionSchema, documentSchema, playerSchema } from "./schemas";
 
 const admin = new Hono<AppEnv>()
-  .use(requireAdmin)
+  .use(requireStaff)
   .use(async (c, next) => {
     await next();
     c.header("Cache-Control", "no-store");

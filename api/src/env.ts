@@ -11,7 +11,8 @@ export type Env = {
   OIDC_PROVIDER_NAME?: string;
 };
 
-export type Role = "admin" | "user";
+/** user: reads the site. manager: also edits games. admin: everything. */
+export type Role = "admin" | "manager" | "user";
 
 export type SessionUser = {
   id: number;

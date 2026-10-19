@@ -237,3 +237,56 @@ describe("oidc", () => {
     expect(cookiesFrom(res)).not.toContain("sat_session");
   });
 });
+
+describe("oidc with self-registered accounts and roles", () => {
+  it("lets the verified owner take over an account someone registered with their email", async () => {
+    const squatter = new Client();
+    const reg = await squatter.request("/api/auth/register", {
+      method: "POST",
+      json: { name: "Impostor", email: "dono@test.pt", password: "palavra-do-impostor" },
+      headers: { "cf-connecting-ip": crypto.randomUUID() },
+    });
+    expect(reg.status).toBe(201);
+
+    const { client } = await signIn({
+      sub: "s-owner",
+      email: "dono@test.pt",
+      email_verified: true,
+    });
+    expect(await (await client.request("/api/auth/me")).json()).toMatchObject({
+      email: "dono@test.pt",
+    });
+    // The impostor is signed out and their password no longer works.
+    expect(await (await squatter.request("/api/auth/me")).json()).toBeNull();
+    expect((await new Client().login("dono@test.pt", "palavra-do-impostor")).status).toBe(401);
+    const row = await env.DB.prepare("SELECT email_verified FROM users WHERE email = ?")
+      .bind("dono@test.pt")
+      .first();
+    expect(row).toEqual({ email_verified: 1 });
+  });
+
+  it("keeps the password and sessions of an account an admin created", async () => {
+    await createUser("criado@test.pt", "user");
+    const before = new Client();
+    await before.login("criado@test.pt");
+    await signIn({ sub: "s-criado", email: "criado@test.pt", email_verified: true });
+    expect(await (await before.request("/api/auth/me")).json()).toMatchObject({
+      email: "criado@test.pt",
+    });
+    expect((await new Client().login("criado@test.pt")).status).toBe(200);
+  });
+
+  it("sends a manager to the games screens", async () => {
+    await createUser("gestor@test.pt", "manager");
+    const toUsers = await signIn(
+      { sub: "s-gestor", email: "gestor@test.pt", email_verified: true },
+      "/admin/utilizadores",
+    );
+    expect(toUsers.callback.headers.get("location")).toBe("/admin/jogos");
+    const toGame = await signIn(
+      { sub: "s-gestor", email: "gestor@test.pt", email_verified: true },
+      "/admin/jogos/12",
+    );
+    expect(toGame.callback.headers.get("location")).toBe("/admin/jogos/12");
+  });
+});

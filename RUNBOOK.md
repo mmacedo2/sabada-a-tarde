@@ -238,6 +238,21 @@ api$ npx wrangler rollback <version-id> --name sabado-a-tarde-web -m "why"
 Same for `sabado-a-tarde-api`. A rollback doesn't undo migrations, which is another reason they
 only ever add things.
 
+### Accounts and roles
+
+Anyone can create an account on **Entrar → Criar conta** (email and password) or with Google.
+New accounts are always **Utilizador**. An admin changes the role in Admin → Utilizadores:
+
+| Role | Can do |
+|---|---|
+| Utilizador | Read the site, change their own password |
+| Gestor de jogos | Also create and edit games, results, goals and cards. Cannot delete games or see any other admin screen, users included |
+| Administrador | Everything |
+
+Nobody checks the email of an account created with a password. If its real owner later signs in
+with Google, they take the account over and the password stops working. Up to 5 accounts per
+hour can be created from one IP.
+
 ### Locked out of the admin
 
 Run `admin:create` again with your email. It resets the password and restores the admin role:

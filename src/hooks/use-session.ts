@@ -11,7 +11,13 @@ import { api, sessionQuery } from "@/lib/api";
 export function useSession() {
   const { data, isPending } = useQuery(sessionQuery);
   const user = data ?? null;
-  return { user, isAdmin: user?.role === "admin", isPending };
+  return {
+    user,
+    isAdmin: user?.role === "admin",
+    /** Admins and managers: both can edit games. */
+    canEditGames: user?.role === "admin" || user?.role === "manager",
+    isPending,
+  };
 }
 
 export function useLogout() {
