@@ -108,6 +108,7 @@ export const clubSchema = z.object({
   initials: text(10),
   locality: text(120),
   crestUrl: link,
+  wallpaperUrl: link,
   color: text(60),
   colorLabel: text(120),
   foundedOn: isoDate.nullable().optional(),

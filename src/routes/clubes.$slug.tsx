@@ -101,7 +101,18 @@ function ClubPage() {
 
   return (
     <div style={{ ["--club" as string]: club.color ?? "var(--primary)" }}>
-      <section className="relative border-b border-ink-border bg-ink text-ink-foreground">
+      <section className="relative overflow-hidden border-b border-ink-border bg-ink text-ink-foreground">
+        {club.wallpaperUrl && (
+          <>
+            <img
+              src={club.wallpaperUrl}
+              alt=""
+              className="absolute inset-0 size-full object-cover opacity-50"
+            />
+            {/* Keeps the name and stats readable on any image. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/80 to-ink/40" />
+          </>
+        )}
         <div
           className="absolute inset-0 opacity-30"
           style={{
