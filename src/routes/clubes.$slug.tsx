@@ -31,7 +31,7 @@ const positionLabel: Record<PlayerPosition, string> = {
 
 export const Route = createFileRoute("/clubes/$slug")({
   loader: async ({ params, context }) => {
-    const catalog = await context.queryClient.ensureQueryData(catalogQuery);
+    const catalog = await context.queryClient.fetchQuery(catalogQuery);
     const club = catalog.clubs.find((c) => c.slug === params.slug);
     if (!club) throw notFound();
     const slug = encodeURIComponent(club.slug);

@@ -253,7 +253,7 @@ export const sessionQuery = queryOptions({
 
 /** The league shown on the home page, standings and club pages: the first league by menu order. */
 export async function loadMainLeague(queryClient: QueryClient) {
-  const catalog = await queryClient.ensureQueryData(catalogQuery);
+  const catalog = await queryClient.fetchQuery(catalogQuery);
   const league = catalog.competitions.find((c) => c.kind === "league") ?? null;
   const standings = league
     ? await api.get<StandingRow[]>(`/api/standings/${encodeURIComponent(league.slug)}`)

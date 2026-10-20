@@ -8,7 +8,7 @@ import { api, catalogQuery, isLive, type Doc, type Game, type StandingRow } from
 // so this only matches competition slugs and 404s on anything else.
 export const Route = createFileRoute("/$competition")({
   loader: async ({ params, context }) => {
-    const catalog = await context.queryClient.ensureQueryData(catalogQuery);
+    const catalog = await context.queryClient.fetchQuery(catalogQuery);
     const competition = catalog.competitions.find((c) => c.slug === params.competition);
     if (!competition) throw notFound();
     const slug = encodeURIComponent(competition.slug);
