@@ -73,7 +73,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: ({ context }) => context.queryClient.ensureQueryData(catalogQuery),
+  loader: ({ context }) => context.queryClient.fetchQuery(catalogQuery),
   staleTime: CATALOG_STALE_MS,
   head: () => ({
     meta: [
