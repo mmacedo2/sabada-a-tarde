@@ -13,9 +13,18 @@ export function MatchCard({ match }: { match: Game }) {
   const showScore = hasScore(match) && match.status !== "scheduled";
   const note =
     match.status === "postponed" || match.status === "cancelled" ? statusLabel[match.status] : null;
+  const sideName = (slug: string | null, placeholder: string | null) =>
+    clubBySlug(slug)?.shortName ?? placeholder ?? "—";
 
   return (
-    <article className="group rounded-xl border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift">
+    <article className="group relative rounded-xl border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift">
+      {/* The whole card opens the game; the club and admin links sit above it (z-10). */}
+      <Link
+        to="/jogos/$id"
+        params={{ id: String(match.id) }}
+        aria-label={`Ver jogo ${sideName(match.home, match.homePlaceholder)} – ${sideName(match.away, match.awayPlaceholder)}`}
+        className="absolute inset-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      />
       <header className="flex items-center justify-between gap-3">
         <span className="eyebrow text-primary">{competition?.name}</span>
         {live ? (
@@ -60,7 +69,7 @@ export function MatchCard({ match }: { match: Game }) {
           {match.venue}
         </p>
       )}
-      <div className="mt-4 flex justify-center empty:hidden">
+      <div className="relative z-10 mt-4 flex justify-center empty:hidden">
         <AdminEditLink
           label="Gerir jogo"
           forManagers
@@ -93,7 +102,7 @@ function Side({
     <Link
       to="/clubes/$slug"
       params={{ slug: club.slug }}
-      className="flex flex-col items-center gap-2 text-center"
+      className="relative z-10 flex flex-col items-center gap-2 text-center"
     >
       <Crest club={club} size="md" className="transition-transform group-hover:scale-105" />
       <span className="text-sm font-semibold leading-tight">{club.shortName}</span>
