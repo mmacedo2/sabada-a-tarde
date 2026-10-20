@@ -19,6 +19,7 @@ export type Club = {
   initials: string | null;
   locality: string | null;
   crestUrl: string | null;
+  wallpaperUrl: string | null;
   color: string | null;
   colorLabel: string | null;
   foundedOn: string | null;

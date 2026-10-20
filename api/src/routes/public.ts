@@ -24,7 +24,8 @@ publicRoutes.get("/catalog", async (c) => {
       "SELECT id, name, starts_on, ends_on, is_current FROM seasons ORDER BY starts_on DESC",
     ),
     c.env.DB.prepare(
-      `SELECT id, slug, name, short_name, initials, locality, crest_url, color, color_label, founded_on, website
+      `SELECT id, slug, name, short_name, initials, locality, crest_url, wallpaper_url, color, color_label,
+              founded_on, website
          FROM clubs WHERE visible = 1 ORDER BY name`,
     ),
     c.env.DB.prepare(

@@ -37,6 +37,7 @@ function ClubsAdmin() {
         { key: "website", label: "Site", type: "url" },
         { key: "visible", label: "Visível no site", type: "checkbox" },
         { key: "crestUrl", label: "Símbolo", type: "image" },
+        { key: "wallpaperUrl", label: "Imagem de fundo da página do clube", type: "image" },
       ]}
       summary={(c) => (
         <span className="flex items-center gap-3">
