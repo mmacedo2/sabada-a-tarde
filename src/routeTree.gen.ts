@@ -31,6 +31,7 @@ import { Route as AdminTransferenciasRouteImport } from './routes/admin.transfer
 import { Route as AdminUtilizadoresRouteImport } from './routes/admin.utilizadores'
 import { Route as ClubesIndexRouteImport } from './routes/clubes.index'
 import { Route as ClubesSlugRouteImport } from './routes/clubes.$slug'
+import { Route as JogosIdRouteImport } from './routes/jogos.$id'
 import { Route as NoticiasIndexRouteImport } from './routes/noticias.index'
 import { Route as NoticiasSlugRouteImport } from './routes/noticias.$slug'
 import { Route as AdminJogosIndexRouteImport } from './routes/admin.jogos.index'
@@ -148,6 +149,11 @@ const ClubesSlugRoute = ClubesSlugRouteImport.update({
   path: '/clubes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JogosIdRoute = JogosIdRouteImport.update({
+  id: '/jogos/$id',
+  path: '/jogos/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
   id: '/noticias/',
   path: '/noticias/',
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/admin/transferencias': typeof AdminTransferenciasRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/clubes/$slug': typeof ClubesSlugRoute
+  '/jogos/$id': typeof JogosIdRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/clubes/': typeof ClubesIndexRoute
@@ -229,6 +236,7 @@ export interface FileRoutesByTo {
   '/admin/transferencias': typeof AdminTransferenciasRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/clubes/$slug': typeof ClubesSlugRoute
+  '/jogos/$id': typeof JogosIdRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
   '/admin': typeof AdminIndexRoute
   '/clubes': typeof ClubesIndexRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/admin/transferencias': typeof AdminTransferenciasRoute
   '/admin/utilizadores': typeof AdminUtilizadoresRoute
   '/clubes/$slug': typeof ClubesSlugRoute
+  '/jogos/$id': typeof JogosIdRoute
   '/noticias/$slug': typeof NoticiasSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/clubes/': typeof ClubesIndexRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin/transferencias'
     | '/admin/utilizadores'
     | '/clubes/$slug'
+    | '/jogos/$id'
     | '/noticias/$slug'
     | '/admin/'
     | '/clubes/'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/admin/transferencias'
     | '/admin/utilizadores'
     | '/clubes/$slug'
+    | '/jogos/$id'
     | '/noticias/$slug'
     | '/admin'
     | '/clubes'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/admin/transferencias'
     | '/admin/utilizadores'
     | '/clubes/$slug'
+    | '/jogos/$id'
     | '/noticias/$slug'
     | '/admin/'
     | '/clubes/'
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   ResultadosRoute: typeof ResultadosRoute
   TransferenciasRoute: typeof TransferenciasRoute
   ClubesSlugRoute: typeof ClubesSlugRoute
+  JogosIdRoute: typeof JogosIdRoute
   NoticiasSlugRoute: typeof NoticiasSlugRoute
   ClubesIndexRoute: typeof ClubesIndexRoute
   NoticiasIndexRoute: typeof NoticiasIndexRoute
@@ -535,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClubesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jogos/$id': {
+      id: '/jogos/$id'
+      path: '/jogos/$id'
+      fullPath: '/jogos/$id'
+      preLoaderRoute: typeof JogosIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/noticias/': {
       id: '/noticias/'
       path: '/noticias'
@@ -627,6 +647,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResultadosRoute: ResultadosRoute,
   TransferenciasRoute: TransferenciasRoute,
   ClubesSlugRoute: ClubesSlugRoute,
+  JogosIdRoute: JogosIdRoute,
   NoticiasSlugRoute: NoticiasSlugRoute,
   ClubesIndexRoute: ClubesIndexRoute,
   NoticiasIndexRoute: NoticiasIndexRoute,
